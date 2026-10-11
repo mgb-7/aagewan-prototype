@@ -1480,6 +1480,10 @@
     btn.addEventListener("click", () => {
       setLang(btn.dataset.lang);
       document.getElementById("langPicker").hidden = true;
+      // Immediately open the intro splash the first time (no setTimeout — iOS Safari drops it sometimes)
+      let seen = false;
+      try { seen = !!localStorage.getItem(STORAGE_KEY + "_seenIntro"); } catch (e) {}
+      if (!seen) openIntro(true);
     });
   });
 
@@ -1918,20 +1922,6 @@
   document.getElementById("btnIntro").addEventListener("click", () => openIntro(false));
   document.getElementById("btnStartReview").addEventListener("click", closeIntro);
   document.getElementById("btnIntroClose").addEventListener("click", closeIntro);
-
-  // After the lang picker is dismissed, show intro on first visit
-  const originalLangChoices = document.getElementById("langPicker").querySelectorAll(".lang-choice");
-  originalLangChoices.forEach(btn => {
-    btn.addEventListener("click", () => {
-      // The existing handler already closes the picker and sets lang.
-      // Check if intro has not been seen → show it now.
-      let seen = false;
-      try { seen = !!localStorage.getItem(STORAGE_KEY + "_seenIntro"); } catch (e) {}
-      if (!seen) {
-        setTimeout(() => openIntro(true), 50);
-      }
-    }, { capture: false });
-  });
 
   // ============================================================
   // BOOT
