@@ -1,0 +1,1963 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F7F3EC">
+<title>Aagewan field view · NBF Direct Aid Pilot</title>
+<style>
+  :root {
+    --bg: #F7F3EC; --surface: #FFFFFF; --surface-sub: #FBF8F2;
+    --fg: #1C1A17; --fg-muted: #5C564E; --fg-faint: #948C7F;
+    --accent: #0F6E56; --accent-ink: #0A4A3B; --accent-tint: #E1EDE8;
+    --rule: #E5DDD1; --rule-strong: #D4CBBB;
+    --mark: #B45309; --pill-bg: #EDE6D6;
+    --wa-send: #25D366;
+    --wa-bezel: #0B0B0D; --wa-screen: #ECE5DD;
+    --wa-header: #075E54; --wa-header-text: #FFFFFF;
+    --wa-bubble-in: #FFFFFF; --wa-bubble-out: #DCF8C6;
+    --wa-text: #1F2225; --wa-text-faint: #667781;
+    --wa-input-field: #FFFFFF; --wa-btn-ink: #075E54;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141210; --surface: #1E1B17; --surface-sub: #221E19;
+      --fg: #F2EDE2; --fg-muted: #AEA698; --fg-faint: #6E675C;
+      --accent: #5FCFAD; --accent-ink: #80E3C4; --accent-tint: #1F3B33;
+      --rule: #2A251D; --rule-strong: #3B342A;
+      --mark: #E39140; --pill-bg: #2A251D;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141210; --surface: #1E1B17; --surface-sub: #221E19;
+    --fg: #F2EDE2; --fg-muted: #AEA698; --fg-faint: #6E675C;
+    --accent: #5FCFAD; --accent-ink: #80E3C4; --accent-tint: #1F3B33;
+    --rule: #2A251D; --rule-strong: #3B342A;
+    --mark: #E39140; --pill-bg: #2A251D;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg); color: var(--fg);
+    font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    font-size: 15px; line-height: 1.6;
+    padding-block: 20px 120px; padding-inline: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+  @media (min-width: 500px) {
+    body { padding-inline: 20px; }
+  }
+  body[lang="gu"] {
+    font-family: "Noto Sans Gujarati",
+      "Hind Vadodara", "Mukta Vaani",
+      "Kohinoor Gujarati", "Gujarati Sangam MN", "GujaratiMT",
+      "Shruti", "Rekha",
+      "DM Sans", system-ui, sans-serif;
+  }
+  .wrap { max-width: 620px; margin: 0 auto; }
+  h1, h2, h3 { font-family: "Fraunces", "Iowan Old Style", Georgia, serif; font-weight: 500; margin: 0; letter-spacing: -0.01em; }
+  body[lang="gu"] h1, body[lang="gu"] h2, body[lang="gu"] h3 {
+    font-family: "Noto Serif Gujarati",
+      "Kohinoor Gujarati", "Gujarati Sangam MN", "GujaratiMT",
+      "Shruti", "Fraunces", serif;
+  }
+  h1 { font-size: clamp(1.9rem, 4vw, 2.5rem); line-height: 1.08; text-wrap: balance; }
+  h2 { font-size: clamp(1.25rem, 2.4vw, 1.5rem); line-height: 1.2; text-wrap: balance; }
+  h3 { font-size: 0.95rem; line-height: 1.3; font-weight: 600; font-family: "DM Sans", sans-serif; }
+  body[lang="gu"] h3 { font-family: "Noto Sans Gujarati", sans-serif; }
+  p { margin: 0; }
+  button { font-family: inherit; }
+  input, textarea, select { font-family: inherit; }
+
+  .eyebrow {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--accent);
+  }
+
+  /* Language picker overlay */
+  .lang-picker {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(28, 26, 23, 0.92);
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .lang-picker-card {
+    background: var(--surface); border-radius: 8px;
+    padding: 36px 32px; max-width: 420px; width: 100%;
+    text-align: center;
+    box-shadow: 0 24px 48px -24px rgba(0,0,0,0.5);
+  }
+  .lang-picker-card .mark {
+    font-family: "Fraunces", serif; font-style: italic;
+    color: var(--accent); font-size: 14px; margin-bottom: 12px;
+  }
+  .lang-picker-card h2 { font-size: 1.5rem; margin-bottom: 10px; }
+  .lang-picker-card .pair { font-size: 0.95rem; color: var(--fg-muted); margin-bottom: 28px; line-height: 1.5; }
+  .lang-picker-card .pair > div + div { margin-top: 6px; font-family: "Noto Sans Gujarati", sans-serif; }
+  .lang-choices { display: flex; gap: 12px; }
+  .lang-choice {
+    flex: 1; padding: 18px 10px;
+    background: var(--surface-sub); border: 1.5px solid var(--rule-strong);
+    border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: 500;
+    color: var(--fg); transition: all .15s ease;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .lang-choice:hover { border-color: var(--accent); background: var(--accent-tint); color: var(--accent-ink); }
+  .lang-choice .big { font-size: 24px; font-weight: 600; }
+  .lang-choice .big.gu { font-family: "Noto Sans Gujarati", sans-serif; }
+  .lang-picker-card .footnote { font-size: 12px; color: var(--fg-faint); margin-top: 20px; font-style: italic; font-family: "Fraunces", serif; }
+
+  /* Header — compact, no overlap on any phone width */
+  header.main-header {
+    padding-block: 4px 20px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 24px;
+  }
+  .header-row {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 10px 14px; flex-wrap: wrap;
+  }
+  .pilot-tag {
+    display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    font-size: 12.5px; color: var(--fg-muted); font-weight: 500;
+    line-height: 1.3; min-width: 0;
+  }
+  .pilot-tag .where {
+    letter-spacing: 0.02em;
+  }
+  .pilot-tag .vtag {
+    font-family: "DM Mono", ui-monospace, monospace;
+    font-size: 11px; color: var(--fg-faint);
+    padding: 2px 8px; background: var(--surface); border: 1px solid var(--rule);
+    border-radius: 10px; letter-spacing: 0.04em; font-weight: 500;
+  }
+  .loaded-version-label:not(:empty) { margin-top: 10px; }
+
+  .top-controls {
+    display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end;
+  }
+  .lang-toggle {
+    display: inline-flex; align-items: center; gap: 2px;
+    background: var(--surface); border: 1px solid var(--rule-strong);
+    border-radius: 20px; padding: 2px; font-size: 12.5px; font-weight: 600;
+  }
+  .lang-toggle button { background: transparent; border: none; cursor: pointer; padding: 5px 12px; border-radius: 18px; color: var(--fg-muted); font-weight: 600; }
+  .lang-toggle button.gu { font-family: "Noto Sans Gujarati", sans-serif; }
+  .lang-toggle button.on { background: var(--accent); color: #fff; }
+
+  .tool-btn {
+    background: var(--surface); border: 1px solid var(--rule-strong);
+    border-radius: 20px; padding: 5px 11px;
+    font-size: 12.5px; font-weight: 500; color: var(--fg-muted);
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 4px;
+    white-space: nowrap;
+  }
+  .tool-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .tool-btn.icon-only { padding: 5px 8px; }
+  body[lang="en"] .tool-btn.gu-only { display: none; }
+  @media (max-width: 420px) {
+    .tool-btn .label { display: none; }
+    .tool-btn { padding: 5px 9px; }
+  }
+
+  /* Scene header */
+  .scene-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-bottom: 8px; flex-wrap: wrap; }
+  .scene-head .num { font-family: "DM Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: 0.06em; color: var(--fg-faint); font-weight: 500; }
+  .scene-head .caption { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
+  body[lang="gu"] .scene-head .caption { letter-spacing: 0.04em; text-transform: none; }
+  .scene-head h2 { margin-top: 6px; width: 100%; }
+  .scene-desc { color: var(--fg-muted); max-width: 56ch; margin: 10px 0 24px; font-size: 15px; }
+
+  /* Phone — scales down on narrow screens */
+  .phone-wrap { display: flex; justify-content: center; margin-bottom: 24px; }
+  .phone { width: min(320px, 92vw); aspect-ratio: 0.49; background: var(--wa-bezel); border-radius: 42px; padding: 10px; position: relative; flex-shrink: 0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15), 0 24px 48px -24px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.04); }
+  @media (max-width: 360px) {
+    .phone { border-radius: 36px; padding: 8px; }
+  }
+  .phone::before { content: ""; position: absolute; top: 18px; left: 50%; transform: translateX(-50%); width: 86px; height: 20px; background: #000; border-radius: 10px; z-index: 10; }
+  .screen { width: 100%; height: 100%; background: var(--wa-screen); border-radius: 34px; overflow: hidden; display: flex; flex-direction: column; position: relative; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; color: var(--wa-text); line-height: 1.4; }
+  body[lang="gu"] .screen { font-family: "Noto Sans Gujarati", -apple-system, system-ui, sans-serif; }
+
+  .statusbar { height: 44px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding: 8px 24px 0; font-size: 13px; font-weight: 600; background: var(--wa-header); color: #fff; }
+  .statusbar .time { font-variant-numeric: tabular-nums; font-family: -apple-system, system-ui, sans-serif; }
+  .statusbar .icons { display: flex; gap: 5px; align-items: center; }
+
+  .wa-header { background: var(--wa-header); color: var(--wa-header-text); padding: 6px 10px 10px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .wa-header .back { opacity: 0.9; }
+  .wa-header .avatar { width: 32px; height: 32px; border-radius: 50%; background: #fff; color: var(--wa-header); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11px; flex-shrink: 0; font-family: -apple-system, system-ui, sans-serif; }
+  .wa-header .who { flex: 1; min-width: 0; }
+  .wa-header .who .name { font-weight: 600; font-size: 14px; }
+  .wa-header .who .state { font-size: 11px; opacity: 0.8; margin-top: -2px; }
+  .wa-header .icons { display: flex; gap: 10px; align-items: center; }
+
+  .chat { flex: 1; min-height: 0; padding: 10px; display: flex; flex-direction: column; gap: 4px; background: var(--wa-screen); overflow: hidden;
+    background-image: radial-gradient(circle at 10% 20%, rgba(0,0,0,0.015) 1px, transparent 1px), radial-gradient(circle at 80% 60%, rgba(0,0,0,0.015) 1px, transparent 1px); background-size: 48px 48px; }
+  .date-chip { align-self: center; background: rgba(225,245,254,0.9); padding: 3px 10px; border-radius: 10px; font-size: 11px; color: var(--wa-text-faint); margin: 6px 0; box-shadow: 0 1px 1px rgba(0,0,0,0.05); }
+
+  .bubble { max-width: 78%; padding: 6px 9px 5px; border-radius: 7px; position: relative; font-size: 12.5px; line-height: 1.38; box-shadow: 0 1px 0.5px rgba(0,0,0,0.13); word-wrap: break-word; }
+  .bubble.in { align-self: flex-start; background: var(--wa-bubble-in); border-top-left-radius: 0; }
+  .bubble.out { align-self: flex-end; background: var(--wa-bubble-out); border-top-right-radius: 0; }
+  .bubble .time { font-size: 10px; color: var(--wa-text-faint); float: right; margin-left: 8px; margin-top: 4px; font-variant-numeric: tabular-nums; font-family: -apple-system, system-ui, sans-serif; }
+  .bubble .time .check { color: #4FC3F7; margin-left: 2px; }
+  .bubble .meta { display: block; font-size: 10px; color: var(--wa-text-faint); margin-top: 3px; font-style: italic; }
+
+  .btn-stack { display: flex; flex-direction: column; gap: 1px; margin: 6px -9px -5px; }
+  .wa-btn { display: block; padding: 10px; text-align: center; color: var(--wa-btn-ink); font-size: 13px; font-weight: 500; border-top: 1px solid #ECECEC; }
+  .wa-btn.pri { font-weight: 600; }
+  .wa-btn.sec { opacity: 0.75; }
+  .btn-row { display: flex; gap: 6px; margin-top: 6px; }
+  .yn-btn { flex: 1; padding: 9px; background: var(--wa-header); color: #fff; border-radius: 20px; text-align: center; font-size: 12.5px; font-weight: 600; letter-spacing: 0.02em; }
+  .yn-btn.ghost { background: #fff; color: var(--wa-header); border: 1px solid var(--wa-header); }
+
+  .checklist { margin: 4px 0 0; display: flex; flex-direction: column; gap: 2px; }
+  .checklist .item { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 12px; }
+  .checklist .item .box { width: 16px; height: 16px; border: 1.5px solid var(--wa-btn-ink); border-radius: 3px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--wa-btn-ink); }
+  .checklist .item.checked .box { background: var(--wa-btn-ink); color: #fff; }
+  .checklist .item.checked .label { font-weight: 500; }
+  .checklist .item .label { flex: 1; }
+
+  .progress { display: flex; align-items: center; gap: 4px; font-size: 10.5px; color: var(--wa-text-faint); margin-top: 6px; }
+  .progress .dots { display: flex; gap: 2px; }
+  .progress .dot { width: 5px; height: 5px; border-radius: 50%; background: #D0D0D0; }
+  .progress .dot.on { background: var(--wa-header); }
+
+  .record-box { margin-top: 6px; padding: 10px; background: #F7F7F7; border-radius: 6px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .record-btn { width: 44px; height: 44px; border-radius: 50%; background: #E53935; color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(229,57,53,0.3); }
+  .record-box .caption { font-size: 11px; color: var(--wa-text-faint); text-align: center; }
+
+  .photo-prompt { margin-top: 6px; padding: 14px; background: #F7F7F7; border-radius: 6px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .camera-btn { width: 56px; height: 56px; border-radius: 50%; background: var(--wa-header); color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(7,94,84,0.3); }
+
+  .summary { margin-top: 6px; font-size: 11.5px; line-height: 1.5; display: flex; flex-direction: column; gap: 7px; }
+  .summary .row { display: flex; justify-content: space-between; gap: 8px; }
+  .summary .row .k { color: var(--wa-text-faint); flex-shrink: 0; }
+  .summary .row .v { color: var(--wa-text); font-weight: 500; text-align: right; }
+  .summary .sec-head { font-size: 10.5px; font-weight: 700; color: var(--wa-header); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; padding-top: 4px; border-top: 1px solid #ECECEC; }
+  body[lang="gu"] .summary .sec-head { text-transform: none; letter-spacing: 0; }
+
+  .ref-pill { display: inline-block; margin-top: 6px; padding: 6px 12px; background: #E8F5E9; color: #1B5E20; border-radius: 14px; font-weight: 600; font-size: 12px; font-family: "DM Mono", monospace; letter-spacing: 0.04em; }
+
+  .input-bar { flex-shrink: 0; background: var(--wa-screen); padding: 6px 8px 10px; display: flex; gap: 6px; align-items: center; }
+  .input-field { flex: 1; background: var(--wa-input-field); border-radius: 22px; padding: 7px 10px; display: flex; align-items: center; gap: 6px; color: var(--wa-text-faint); font-size: 12.5px; min-width: 0; box-shadow: 0 1px 1px rgba(0,0,0,0.05); }
+  .input-field .ph { flex: 1; min-width: 0; }
+  .mic-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--wa-header); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+
+  /* Nav */
+  .nav { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; padding: 16px 0 8px; margin-bottom: 28px; }
+  .nav-btn { background: var(--surface); color: var(--fg); border: 1px solid var(--rule-strong); padding: 10px 18px; font-size: 14px; font-weight: 500; cursor: pointer; border-radius: 24px; display: inline-flex; align-items: center; gap: 6px; transition: all .15s ease; }
+  .nav-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: var(--surface-sub); }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .nav-btn.back { justify-self: start; }
+  .nav-btn.next { justify-self: end; }
+  .scene-dots { display: flex; gap: 6px; align-items: center; justify-content: center; }
+  .scene-dots .d { width: 8px; height: 8px; border-radius: 50%; background: var(--rule-strong); cursor: pointer; border: 0; padding: 0; transition: all .15s ease; }
+  .scene-dots .d.on { background: var(--accent); transform: scale(1.4); }
+  .scene-dots .d:hover { background: var(--accent); }
+
+  .scene-notes { background: var(--surface-sub); border: 1px solid var(--rule); padding: 20px 22px; border-radius: 2px; margin-bottom: 24px; font-size: 14.5px; color: var(--fg); line-height: 1.65; }
+  .scene-notes p { margin-bottom: 10px; }
+  .scene-notes p:last-child { margin-bottom: 0; }
+  .scene-notes strong { color: var(--accent-ink); font-weight: 600; }
+  .scene-notes .noted { display: block; margin-top: 14px; padding: 10px 14px; background: var(--pill-bg); border-left: 2px solid var(--mark); font-size: 13px; color: var(--fg-muted); line-height: 1.55; }
+
+  /* Per-screen local notes & suggestions */
+  .reviewer-area { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--rule); }
+  .reviewer-area h3 { font-size: 0.95rem; margin-bottom: 10px; color: var(--fg); display: flex; align-items: center; gap: 8px; }
+  .reviewer-area h3 .mark { font-size: 11px; color: var(--fg-faint); font-weight: 400; font-family: "Fraunces", serif; font-style: italic; }
+  body[lang="gu"] .reviewer-area h3 .mark { font-family: "Noto Serif Gujarati", serif; font-style: normal; }
+  .reviewer-area + .reviewer-area { margin-top: 24px; }
+  .notes-textarea { width: 100%; min-height: 80px; resize: vertical; padding: 10px 12px; border: 1px solid var(--rule-strong); border-radius: 2px; background: var(--surface); color: var(--fg); font-size: 14px; line-height: 1.5; }
+  body[lang="gu"] .notes-textarea { font-family: "Noto Sans Gujarati", sans-serif; }
+  .notes-textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-tint); }
+  .save-indicator { font-size: 11.5px; color: var(--fg-faint); margin-top: 4px; font-style: italic; }
+  .save-indicator.saved { color: var(--accent); }
+
+  .suggestion-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .suggestion-actions button {
+    background: var(--surface); color: var(--fg); border: 1px solid var(--rule-strong);
+    padding: 6px 12px; font-size: 13px; border-radius: 16px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .suggestion-actions button:hover { border-color: var(--accent); color: var(--accent); }
+  .suggestion-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+  .suggestion-item {
+    background: var(--surface); border: 1px solid var(--rule); padding: 10px 12px;
+    border-radius: 2px; font-size: 13.5px; line-height: 1.5; display: flex; gap: 8px; justify-content: space-between; align-items: flex-start;
+  }
+  .suggestion-item .tag { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 2px 6px; border-radius: 3px; letter-spacing: 0.06em; margin-right: 6px; font-family: "DM Mono", monospace; }
+  .suggestion-item .tag.add { background: var(--accent-tint); color: var(--accent-ink); }
+  .suggestion-item .tag.del { background: #FDE5E0; color: #B4321A; }
+  .suggestion-item .reason { color: var(--fg-muted); font-style: italic; font-size: 12.5px; margin-top: 4px; }
+  .suggestion-item .remove-btn { background: transparent; border: none; color: var(--fg-faint); cursor: pointer; font-size: 18px; padding: 0 4px; line-height: 1; }
+  .suggestion-item .remove-btn:hover { color: #B4321A; }
+
+  /* Intro splash — welcome / about this prototype */
+  .intro-splash {
+    position: fixed; inset: 0; z-index: 950;
+    background: var(--bg);
+    display: none; flex-direction: column;
+    overflow-y: auto;
+  }
+  .intro-splash.open { display: flex; }
+  .intro-splash-inner {
+    max-width: 620px; margin: 0 auto; width: 100%;
+    padding: 32px 20px 48px;
+    display: flex; flex-direction: column; gap: 20px;
+  }
+  @media (min-width: 500px) {
+    .intro-splash-inner { padding: 48px 24px; }
+  }
+  .intro-splash .eyebrow { margin-bottom: 4px; }
+  .intro-splash h1 {
+    font-family: "Fraunces", "Iowan Old Style", Georgia, serif;
+    font-weight: 500; font-size: clamp(1.9rem, 5vw, 2.4rem);
+    line-height: 1.1; letter-spacing: -0.01em;
+    margin: 0 0 6px; text-wrap: balance;
+  }
+  body[lang="gu"] .intro-splash h1 { font-family: "Noto Serif Gujarati", serif; }
+  .intro-splash .lede {
+    font-family: "Fraunces", Georgia, serif; font-style: italic;
+    color: var(--fg-muted); font-size: 1.05rem; line-height: 1.5;
+    margin: 0 0 8px;
+  }
+  body[lang="gu"] .intro-splash .lede { font-family: "Noto Serif Gujarati", serif; }
+  .intro-splash .intro-section {
+    background: var(--surface); border: 1px solid var(--rule);
+    padding: 18px 20px; border-radius: 4px;
+  }
+  .intro-splash .intro-section + .intro-section { margin-top: 0; }
+  .intro-splash .intro-section h2 {
+    font-family: "DM Sans", sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--accent);
+    margin: 0 0 10px;
+  }
+  body[lang="gu"] .intro-splash .intro-section h2 {
+    font-family: "Noto Sans Gujarati", sans-serif;
+    letter-spacing: 0.04em; text-transform: none;
+  }
+  .intro-splash .intro-section p { font-size: 14.5px; line-height: 1.6; color: var(--fg); margin: 0 0 10px; }
+  .intro-splash .intro-section p:last-child { margin-bottom: 0; }
+  .intro-splash .intro-section ul { font-size: 14px; line-height: 1.6; color: var(--fg); margin: 0; padding-left: 20px; }
+  .intro-splash .intro-section ul li { margin-bottom: 6px; }
+  .intro-splash .intro-section ul li:last-child { margin-bottom: 0; }
+  .intro-splash .intro-section em { color: var(--accent-ink); font-style: italic; font-weight: 500; font-family: "Fraunces", serif; }
+  body[lang="gu"] .intro-splash .intro-section em { font-family: "Noto Serif Gujarati", serif; }
+  .intro-splash .start-row {
+    display: flex; justify-content: flex-end;
+    position: sticky; bottom: 0;
+    padding: 16px 0 8px;
+    margin-top: 12px;
+    background: linear-gradient(to top, var(--bg) 0%, var(--bg) 70%, transparent 100%);
+  }
+  .intro-splash .start-btn {
+    background: var(--accent); color: #fff; border: none;
+    padding: 12px 24px; font-size: 15px; font-weight: 600;
+    border-radius: 28px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: inherit;
+    box-shadow: 0 2px 6px rgba(15,110,86,0.2);
+  }
+  .intro-splash .start-btn:hover { background: var(--accent-ink); }
+  .intro-splash .top-right-close {
+    position: absolute; top: 16px; right: 16px;
+    background: var(--surface); border: 1px solid var(--rule-strong);
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--fg-muted); font-size: 16px;
+  }
+  .intro-splash.first-visit .top-right-close { display: none; }
+  .intro-splash .names-note {
+    background: var(--pill-bg); border-left: 2px solid var(--mark);
+    padding: 10px 14px; font-size: 13.5px; color: var(--fg-muted);
+    line-height: 1.55; margin-top: 10px;
+  }
+  .intro-splash .names-note strong { color: var(--fg); font-weight: 600; }
+
+  /* Splash language chooser — always visible at the top */
+  .splash-lang-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 12px; padding-bottom: 16px; margin-bottom: 8px;
+    border-bottom: 1px solid var(--rule); flex-wrap: wrap;
+  }
+  .splash-lang-bar .labels {
+    font-size: 12.5px; color: var(--fg-faint); font-weight: 500;
+    line-height: 1.35;
+  }
+  .splash-lang-bar .labels .en { }
+  .splash-lang-bar .labels .gu { font-family: "Noto Sans Gujarati", sans-serif; }
+  .splash-lang-choice {
+    display: inline-flex; gap: 2px;
+    background: var(--surface); border: 1px solid var(--rule-strong);
+    border-radius: 24px; padding: 3px;
+  }
+  .splash-lang-choice button {
+    background: transparent; border: none; cursor: pointer;
+    padding: 8px 20px; border-radius: 22px;
+    color: var(--fg-muted); font-family: inherit; font-weight: 600;
+    font-size: 14px; min-width: 56px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .splash-lang-choice button.gu { font-family: "Noto Sans Gujarati", sans-serif; }
+  .splash-lang-choice button.on {
+    background: var(--accent); color: #fff;
+  }
+  .splash-lang-choice button:not(.on):hover { color: var(--accent); }
+
+  /* Floating action button (Send) */
+  .fab {
+    position: fixed; bottom: 24px; right: 24px; z-index: 50;
+    background: var(--wa-send); color: #fff; border: none;
+    padding: 14px 20px; border-radius: 28px; cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 14px; font-weight: 600;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3), 0 2px 4px rgba(0,0,0,0.1);
+    transition: all .15s ease;
+  }
+  .fab:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(37, 211, 102, 0.4), 0 3px 6px rgba(0,0,0,0.15); }
+  .fab .count { background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; min-width: 22px; text-align: center; }
+  @media (max-width: 420px) {
+    .fab { bottom: 16px; right: 16px; padding: 12px 16px; font-size: 13.5px; }
+  }
+
+  /* Drawers and modals */
+  .overlay { position: fixed; inset: 0; z-index: 900; background: rgba(28, 26, 23, 0.6); display: none; }
+  .overlay.open { display: block; }
+  .drawer {
+    position: fixed; top: 0; right: 0; bottom: 0; width: 100%; max-width: 640px;
+    background: var(--bg); z-index: 901; display: none; flex-direction: column;
+    box-shadow: -20px 0 48px -24px rgba(0,0,0,0.3);
+  }
+  .drawer.open { display: flex; }
+  .drawer-head { padding: 20px 24px; border-bottom: 1px solid var(--rule); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-shrink: 0; background: var(--surface); }
+  .drawer-head h2 { font-size: 1.2rem; margin: 0; }
+  .drawer-head .close { background: transparent; border: none; cursor: pointer; color: var(--fg-muted); padding: 8px; font-size: 20px; }
+  .drawer-intro { padding: 16px 24px; font-size: 13.5px; color: var(--fg-muted); background: var(--surface-sub); border-bottom: 1px solid var(--rule); line-height: 1.55; }
+  .drawer-intro strong { color: var(--fg); }
+  .drawer-body { flex: 1; overflow-y: auto; padding: 16px 24px; }
+
+  .modal {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: var(--bg); z-index: 902; display: none;
+    width: 95%; max-width: 520px; max-height: 90vh; flex-direction: column;
+    border-radius: 6px; box-shadow: 0 24px 48px -16px rgba(0,0,0,0.3);
+  }
+  .modal.open { display: flex; }
+  .modal-head { padding: 18px 22px; border-bottom: 1px solid var(--rule); display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-shrink: 0; }
+  .modal-head h3 { font-family: "Fraunces", serif; font-weight: 500; font-size: 1.25rem; margin: 0; }
+  body[lang="gu"] .modal-head h3 { font-family: "Noto Serif Gujarati", serif; }
+  .modal-head .close { background: transparent; border: none; cursor: pointer; color: var(--fg-muted); padding: 8px; font-size: 20px; }
+  .modal-body { flex: 1; overflow-y: auto; padding: 18px 22px; }
+  .modal-foot { padding: 14px 22px; border-top: 1px solid var(--rule); display: flex; justify-content: flex-end; gap: 8px; flex-shrink: 0; }
+  .modal-foot button {
+    background: var(--surface); color: var(--fg); border: 1px solid var(--rule-strong);
+    padding: 8px 16px; font-size: 14px; cursor: pointer; border-radius: 20px; font-weight: 500;
+  }
+  .modal-foot button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .modal-foot button.primary:hover { background: var(--accent-ink); }
+  .modal-foot button.send { background: var(--wa-send); color: #fff; border-color: var(--wa-send); }
+  .modal-foot button.send:hover { background: #1DAE57; }
+  .modal-foot button:hover:not(.primary):not(.send) { border-color: var(--accent); color: var(--accent); }
+
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--fg); }
+  .field label .hint { font-weight: 400; color: var(--fg-faint); font-style: italic; }
+  .field input, .field textarea, .field select {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--rule-strong); border-radius: 2px;
+    background: var(--surface); color: var(--fg); font-size: 14px; line-height: 1.5;
+  }
+  body[lang="gu"] .field input, body[lang="gu"] .field textarea { font-family: "Noto Sans Gujarati", sans-serif; }
+  .field textarea { min-height: 70px; resize: vertical; }
+  .field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-tint); }
+
+  .question-pick { display: flex; flex-direction: column; gap: 4px; max-height: 240px; overflow-y: auto; border: 1px solid var(--rule); border-radius: 2px; padding: 6px; }
+  .question-pick label { display: flex; gap: 8px; padding: 7px 8px; border-radius: 2px; cursor: pointer; font-size: 13.5px; }
+  .question-pick label:hover { background: var(--surface-sub); }
+  .question-pick label input { margin-top: 3px; flex-shrink: 0; }
+  .question-pick label .label-text { flex: 1; }
+  .question-pick label .label-text .key { font-family: "DM Mono", monospace; font-size: 10.5px; color: var(--fg-faint); display: block; margin-top: 2px; }
+
+  /* Translation editor */
+  .editor-group { margin-bottom: 24px; }
+  .editor-group h3 { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); padding: 8px 0; border-bottom: 1px solid var(--rule); margin-bottom: 12px; font-family: "DM Mono", monospace; }
+  .edit-row { display: flex; flex-direction: column; gap: 6px; padding: 12px 0; border-bottom: 1px solid var(--rule); }
+  .edit-row .meta { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--fg-faint); font-family: "DM Mono", monospace; }
+  .edit-row .meta .k { font-weight: 500; }
+  .edit-row .meta .by { font-style: italic; }
+  .edit-row .en-ref { font-size: 13px; color: var(--fg-muted); background: var(--surface-sub); padding: 8px 10px; border-radius: 2px; border-left: 2px solid var(--rule-strong); line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+  .edit-row textarea { width: 100%; min-height: 56px; padding: 10px 12px; border: 1px solid var(--rule-strong); border-radius: 2px; background: var(--surface); color: var(--fg); font-family: "Noto Sans Gujarati", -apple-system, sans-serif; font-size: 14px; line-height: 1.5; resize: vertical; }
+  .edit-row textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-tint); }
+  .edit-row .actions { display: flex; gap: 8px; align-items: center; }
+  .edit-row .actions button { padding: 5px 12px; font-size: 12px; border-radius: 14px; cursor: pointer; font-weight: 500; border: 1px solid var(--rule-strong); background: var(--surface); color: var(--fg-muted); }
+  .edit-row .actions button.save { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .edit-row .actions button.save:hover { background: var(--accent-ink); }
+  .edit-row .actions button:hover:not(.save) { border-color: var(--accent); color: var(--accent); }
+  .edit-row .actions .status { font-size: 11px; color: var(--fg-faint); margin-left: auto; }
+  .edit-row.edited .en-ref { border-left-color: var(--accent); }
+
+  /* Versions */
+  .version-list { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+  .version-item { background: var(--surface); border: 1px solid var(--rule); padding: 14px 16px; border-radius: 4px; }
+  .version-item .vname { font-weight: 600; margin-bottom: 4px; color: var(--fg); }
+  .version-item .vdate { font-size: 11.5px; color: var(--fg-faint); font-family: "DM Mono", monospace; margin-bottom: 10px; }
+  .version-item .vstats { font-size: 12.5px; color: var(--fg-muted); margin-bottom: 10px; }
+  .version-item .vstats span { margin-right: 10px; }
+  .version-item .vactions { display: flex; gap: 6px; flex-wrap: wrap; }
+  .version-item .vactions button {
+    background: var(--surface-sub); border: 1px solid var(--rule-strong); padding: 5px 11px; font-size: 12px; border-radius: 14px; cursor: pointer; color: var(--fg); font-weight: 500;
+  }
+  .version-item .vactions button.send { background: var(--wa-send); color: #fff; border-color: var(--wa-send); }
+  .version-item .vactions button.send:hover { background: #1DAE57; }
+  .version-item .vactions button.danger { color: #B4321A; }
+  .version-item .vactions button:hover:not(.send):not(.danger) { border-color: var(--accent); color: var(--accent); }
+  .version-item .vactions button.danger:hover { background: #FDE5E0; }
+
+  .save-version-area {
+    background: var(--surface-sub); padding: 14px 16px; border-radius: 4px; border: 1px solid var(--rule);
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  }
+  .save-version-area input { flex: 1; min-width: 160px; padding: 7px 10px; border: 1px solid var(--rule-strong); border-radius: 2px; background: var(--surface); color: var(--fg); font-size: 13.5px; }
+  .save-version-area button { background: var(--accent); color: #fff; border: none; padding: 7px 14px; border-radius: 16px; cursor: pointer; font-size: 13px; font-weight: 500; }
+
+  .empty-list { padding: 20px 0; text-align: center; color: var(--fg-faint); font-size: 14px; font-style: italic; font-family: "Fraunces", serif; }
+  body[lang="gu"] .empty-list { font-family: "Noto Serif Gujarati", serif; font-style: normal; }
+
+  /* Send modal specifics */
+  .send-section { margin-bottom: 20px; }
+  .send-section .send-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .send-section .send-head h4 { font-size: 13px; font-weight: 600; margin: 0; color: var(--fg); }
+  .send-section .send-head .toggle { font-size: 11.5px; color: var(--fg-muted); display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+  .send-section .preview { background: var(--surface-sub); padding: 10px 12px; border-radius: 2px; font-size: 12.5px; color: var(--fg-muted); line-height: 1.5; max-height: 160px; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word; }
+  .send-section.off .preview { opacity: 0.4; }
+  .msg-length { font-size: 11.5px; color: var(--fg-faint); font-family: "DM Mono", monospace; margin-top: 8px; }
+  .msg-length.warn { color: var(--mark); }
+
+  footer.page { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--rule); font-size: 13px; color: var(--fg-faint); font-style: italic; font-family: "Fraunces", serif; text-align: center; line-height: 1.6; }
+  body[lang="gu"] footer.page { font-family: "Noto Serif Gujarati", serif; font-style: normal; }
+  .current-version-badge { font-size: 12px; color: var(--accent); font-weight: 600; margin-top: 8px; display: inline-block; padding: 3px 10px; background: var(--accent-tint); border-radius: 12px; }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Noto+Sans+Gujarati:wght@400;500;600;700&family=Noto+Serif+Gujarati:wght@400;500;600&display=swap">
+</head>
+<body>
+
+<!-- Language picker overlay -->
+<div class="lang-picker" id="langPicker" hidden>
+  <div class="lang-picker-card">
+    <div class="mark">Direct Aid Pilot · Design preview</div>
+    <h2>Choose a language</h2>
+    <div class="pair">
+      <div>Please pick the language you want to review this prototype in.</div>
+      <div>આ પ્રોટોટાઇપ કઈ ભાષામાં જોવું છે તે પસંદ કરો.</div>
+    </div>
+    <div class="lang-choices">
+      <button class="lang-choice" data-lang="en"><span class="big">EN</span><span>English</span></button>
+      <button class="lang-choice" data-lang="gu"><span class="big gu">ગુ</span><span style="font-family: 'Noto Sans Gujarati', sans-serif;">ગુજરાતી</span></button>
+    </div>
+    <div class="footnote">You can change this later in the top-right.</div>
+  </div>
+</div>
+
+<div class="wrap">
+  <header class="main-header">
+    <div class="header-row">
+      <div class="pilot-tag">
+        <span class="where" data-k="ui.where"></span>
+        <span class="vtag" data-k="ui.eyebrow"></span>
+      </div>
+      <div class="top-controls">
+        <button class="tool-btn icon-only" id="btnIntro" title="About this prototype" aria-label="About">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 15h-2v-6h2zm0-8h-2V7h2z"/></svg>
+        </button>
+        <button class="tool-btn" id="btnVersions" title="Saved versions">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10 10 10 0 0 0-10-10zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm1-12h-2v5l4.3 2.6.7-1.2L13 11.5z"/></svg>
+          <span class="label" data-k="ui.versions">Versions</span>
+        </button>
+        <button class="tool-btn gu-only" id="btnEditor" title="Edit Gujarati">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M21.4 7.4l-4-4a2 2 0 0 0-2.8 0l-10.4 10.4a2 2 0 0 0-.5.9l-1.4 5.7a1 1 0 0 0 1.3 1.3l5.7-1.4a2 2 0 0 0 .9-.5l10.4-10.4a2 2 0 0 0-.2-2z"/></svg>
+          <span class="label" data-k="ui.edit">Edit Gujarati</span>
+        </button>
+        <div class="lang-toggle">
+          <button data-lang="en" id="toggleEn">EN</button>
+          <button data-lang="gu" id="toggleGu" class="gu">ગુ</button>
+        </div>
+      </div>
+    </div>
+    <div class="loaded-version-label" id="currentVersionLabel"></div>
+  </header>
+
+  <main>
+    <div class="scene-head">
+      <span class="num" id="sceneNum">01 / 09</span>
+      <span class="caption" id="sceneCaption"></span>
+      <h2 id="sceneTitle"></h2>
+    </div>
+    <p class="scene-desc" id="sceneDesc"></p>
+
+    <div class="phone-wrap">
+      <div class="phone"><div class="screen" id="phoneScreen"></div></div>
+    </div>
+
+    <div class="nav">
+      <button class="nav-btn back" id="btnBack">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.8l5.6-5.6L12 4l-8 8 8 8 1.4-1.4L7.8 13H20z"/></svg>
+        <span data-k="ui.back"></span>
+      </button>
+      <div class="scene-dots" id="sceneDots"></div>
+      <button class="nav-btn next" id="btnNext">
+        <span data-k="ui.next"></span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M4 13h12.2l-5.6 5.6L12 20l8-8-8-8-1.4 1.4L16.2 11H4z"/></svg>
+      </button>
+    </div>
+
+    <div class="scene-notes" id="sceneNotes"></div>
+
+    <!-- Per-screen local notes -->
+    <section class="reviewer-area">
+      <h3><span data-k="ui.notesTitle"></span><span class="mark" data-k="ui.notesHint"></span></h3>
+      <textarea class="notes-textarea" id="notesText"></textarea>
+      <div class="save-indicator" id="notesStatus"></div>
+    </section>
+
+    <!-- Per-screen structural suggestions -->
+    <section class="reviewer-area">
+      <h3><span data-k="ui.structTitle"></span><span class="mark" data-k="ui.structHint"></span></h3>
+      <div class="suggestion-actions">
+        <button id="btnAddQuestion"><span>+</span><span data-k="ui.addQ"></span></button>
+        <button id="btnDeleteQuestion"><span>−</span><span data-k="ui.deleteQ"></span></button>
+      </div>
+      <div class="suggestion-list" id="suggestionList"></div>
+    </section>
+  </main>
+
+  <footer class="page"><p data-k="ui.footer"></p></footer>
+</div>
+
+<!-- Intro splash — welcome screen -->
+<div class="intro-splash" id="introSplash">
+  <button class="top-right-close" id="btnIntroClose" aria-label="Close">✕</button>
+  <div class="intro-splash-inner">
+    <div class="splash-lang-bar">
+      <div class="labels">
+        <div class="en">Review in:</div>
+        <div class="gu">સમીક્ષા ભાષા:</div>
+      </div>
+      <div class="splash-lang-choice">
+        <button data-splash-lang="en" id="splashLangEn">EN</button>
+        <button data-splash-lang="gu" id="splashLangGu" class="gu">ગુ</button>
+      </div>
+    </div>
+    <div class="eyebrow" data-k="ui.eyebrow"></div>
+    <h1 data-k="ui.title"></h1>
+    <p class="lede" data-k="ui.lede"></p>
+
+    <div class="intro-section">
+      <h2 data-k="intro.whatIsThis"></h2>
+      <p data-k="intro.whatIsThis.body"></p>
+    </div>
+
+    <div class="intro-section">
+      <h2 data-k="intro.namesNote"></h2>
+      <p data-k="intro.namesNote.body"></p>
+      <div class="names-note" data-k="intro.namesNote.card"></div>
+    </div>
+
+    <div class="intro-section">
+      <h2 data-k="intro.howToUse"></h2>
+      <ul>
+        <li data-k="intro.howToUse.1"></li>
+        <li data-k="intro.howToUse.2"></li>
+        <li data-k="intro.howToUse.3"></li>
+        <li data-k="intro.howToUse.4"></li>
+        <li data-k="intro.howToUse.5"></li>
+        <li data-k="intro.howToUse.6"></li>
+      </ul>
+      <p style="margin-top: 12px;" data-k="intro.howToUse.footer"></p>
+    </div>
+
+    <div class="start-row">
+      <button class="start-btn" id="btnStartReview">
+        <span data-k="intro.startBtn"></span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M4 13h12.2l-5.6 5.6L12 20l8-8-8-8-1.4 1.4L16.2 11H4z"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Floating send button -->
+<button class="fab" id="btnSend">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 12.1l-18-9a1 1 0 0 0-1.3 1.3L4 11l11 1-11 1-2.8 6.6a1 1 0 0 0 1.3 1.3l18-9a1 1 0 0 0 0-1.8z"/></svg>
+  <span data-k="ui.sendBtn">Send to NBF</span>
+  <span class="count" id="sendCount">0</span>
+</button>
+
+<!-- Translation editor drawer -->
+<div class="overlay" id="editorOverlay"></div>
+<div class="drawer" id="editorDrawer">
+  <div class="drawer-head">
+    <h2 data-k="ui.editorTitle">Edit Gujarati translations</h2>
+    <button class="close" data-close-editor>✕</button>
+  </div>
+  <div class="drawer-intro" data-k="ui.editorIntro"></div>
+  <div class="drawer-body" id="editorBody"></div>
+</div>
+
+<!-- Versions drawer -->
+<div class="overlay" id="versionsOverlay"></div>
+<div class="drawer" id="versionsDrawer">
+  <div class="drawer-head">
+    <h2 data-k="ui.versionsTitle">Saved versions</h2>
+    <button class="close" data-close-versions>✕</button>
+  </div>
+  <div class="drawer-intro" data-k="ui.versionsIntro"></div>
+  <div class="drawer-body">
+    <div class="save-version-area">
+      <input type="text" id="newVersionName" />
+      <button id="btnSaveVersion" data-k="ui.saveNew">Save as new version</button>
+    </div>
+    <div class="version-list" id="versionList"></div>
+  </div>
+</div>
+
+<!-- Add question modal -->
+<div class="overlay" id="addQOverlay"></div>
+<div class="modal" id="addQModal">
+  <div class="modal-head"><h3 data-k="ui.addQModalTitle">Add a question to this screen</h3><button class="close" data-close-addq>✕</button></div>
+  <div class="modal-body">
+    <div class="field">
+      <label><span data-k="ui.addQText">What question should be added?</span></label>
+      <textarea id="addQText" placeholder=""></textarea>
+    </div>
+    <div class="field">
+      <label><span data-k="ui.addQWhere">Where should it go?</span></label>
+      <select id="addQWhere"></select>
+    </div>
+    <div class="field">
+      <label><span data-k="ui.addQReason">Why?</span><span class="hint" data-k="ui.optional"></span></label>
+      <textarea id="addQReason" placeholder=""></textarea>
+    </div>
+  </div>
+  <div class="modal-foot">
+    <button data-close-addq data-k="ui.cancel">Cancel</button>
+    <button class="primary" id="btnAddQSubmit" data-k="ui.add">Add suggestion</button>
+  </div>
+</div>
+
+<!-- Delete question modal -->
+<div class="overlay" id="delQOverlay"></div>
+<div class="modal" id="delQModal">
+  <div class="modal-head"><h3 data-k="ui.delQModalTitle">Suggest deleting a question</h3><button class="close" data-close-delq>✕</button></div>
+  <div class="modal-body">
+    <div class="field">
+      <label><span data-k="ui.delQPick">Which questions should be removed? (tick all that apply)</span></label>
+      <div class="question-pick" id="delQPick"></div>
+    </div>
+    <div class="field">
+      <label><span data-k="ui.delQReason">Why?</span><span class="hint" data-k="ui.optional"></span></label>
+      <textarea id="delQReason"></textarea>
+    </div>
+  </div>
+  <div class="modal-foot">
+    <button data-close-delq data-k="ui.cancel">Cancel</button>
+    <button class="primary" id="btnDelQSubmit" data-k="ui.suggestDelete">Suggest deletion</button>
+  </div>
+</div>
+
+<!-- Send to NBF modal -->
+<div class="overlay" id="sendOverlay"></div>
+<div class="modal" id="sendModal" style="max-width: 580px;">
+  <div class="modal-head"><h3 data-k="ui.sendModalTitle">Send feedback to NBF</h3><button class="close" data-close-send>✕</button></div>
+  <div class="modal-body" id="sendBody"></div>
+  <div class="modal-foot">
+    <button data-close-send data-k="ui.cancel">Cancel</button>
+    <button class="send" id="btnSendWa">
+      <span data-k="ui.sendViaWa">Open WhatsApp</span>
+    </button>
+  </div>
+</div>
+
+<script>
+  // ============================================================
+  // CONFIGURATION
+  // ============================================================
+  const NBF_WHATSAPP = "919825005352"; // without + or spaces, for wa.me URL
+  const STORAGE_KEY = "nbf_prototype_v1";
+
+  // ============================================================
+  // TRANSLATIONS — every piece of text, in both languages
+  // ============================================================
+  const T = {
+    "ui.eyebrow":    { en: "v0.5", gu: "v0.5" },
+    "ui.title":      { en: "Review the Aagewan field view", gu: "આગેવાનના ફોન પર કેવું દેખાય તે જુઓ" },
+    "ui.lede":       { en: "A design preview of the WhatsApp application form for the NBF Direct Aid Pilot.",
+                       gu: "NBF ડાયરેક્ટ એઇડ પાયલટ માટે WhatsApp અરજી ફોર્મની ડિઝાઇન પ્રિવ્યૂ." },
+    "ui.where":      { en: "Nirmala Bakubhai Foundation · Direct Aid Pilot", gu: "નિર્મળા બકુભાઈ ફાઉન્ડેશન · ડાયરેક્ટ એઇડ પાયલટ" },
+
+    // Intro splash
+    "intro.whatIsThis": { en: "What this is", gu: "આ શું છે" },
+    "intro.whatIsThis.body": {
+      en: "This is a design preview, not a working app. Tap through nine screens to see how an Aagewan would fill in an application for a family through WhatsApp on her phone. You can leave feedback on anything you see.",
+      gu: "આ ખાલી ડિઝાઇન પ્રિવ્યૂ છે, ચાલુ ઍપ નથી. નવ સ્ક્રીન જોવા માટે આગળ-પાછળ કરો અને જુઓ કે આગેવાન WhatsApp પર પરિવાર માટે અરજી કેવી રીતે ભરશે. તમે જે જુઓ તેના પર કોઈ પણ અભિપ્રાય આપી શકો."
+    },
+    "intro.namesNote": { en: "About the names", gu: "નામ વિશે" },
+    "intro.namesNote.body": {
+      en: "To make the screens feel like a real application, the preview uses specific names. These are placeholders — chosen at random, not representing any real family.",
+      gu: "સ્ક્રીન ખરેખરની અરજી જેવી લાગે તે માટે પ્રિવ્યૂમાં ચોક્કસ નામ વાપર્યાં છે. એ ખાલી જગ્યા ભરવા માટે છે — કોઈ ખરેખરના પરિવારના નથી."
+    },
+    "intro.namesNote.card": {
+      en: "<strong>Lataben</strong> is the Aagewan filling in the form. <strong>Kokilaben Patel</strong> is the applicant (an elderly grandmother). <strong>Priya, Jigar and Meera</strong> are her grandchildren. All of these names are random.",
+      gu: "<strong>લતાબેન</strong> એ ફોર્મ ભરનાર આગેવાન છે. <strong>કોકિલાબેન પટેલ</strong> એ અરજી કરનાર (વૃદ્ધ દાદી) છે. <strong>પ્રિયા, જિગર અને મીરા</strong> એ તેમના પૌત્ર-પૌત્રી છે. આ બધા નામ ખાલી ઉદાહરણ માટે છે."
+    },
+    "intro.howToUse": { en: "How to use this preview", gu: "આ પ્રિવ્યૂ કેવી રીતે વાપરવી" },
+    "intro.howToUse.1": {
+      en: "Tap Next / Back or the dots to move between the nine screens.",
+      gu: "નવ સ્ક્રીન વચ્ચે આગળ-પાછળ કરવા Next / Back બટન કે ટપકાં દબાવો."
+    },
+    "intro.howToUse.2": {
+      en: "Write notes under any screen. They save on your device as you type.",
+      gu: "કોઈ પણ સ્ક્રીન નીચે નોંધ લખો. લખતાની સાથે તમારા ફોન પર સેવ થાય."
+    },
+    "intro.howToUse.3": {
+      en: "Switch between English and Gujarati with the EN / ગુ button at the top.",
+      gu: "ઉપરના EN / ગુ બટનથી અંગ્રેજી અને ગુજરાતી વચ્ચે બદલો."
+    },
+    "intro.howToUse.4": {
+      en: "In Gujarati, use the Edit button to adjust translations to the natural, everyday Gujarati Aagewans and families actually speak.",
+      gu: "ગુજરાતીમાં, Edit બટનથી ભાષાંતરને આગેવાનો અને પરિવાર ખરેખર જે બોલે તેવી સામાન્ય ભાષામાં બદલો."
+    },
+    "intro.howToUse.5": {
+      en: "Suggest adding or removing questions on any screen using the + and − buttons under each phone mockup.",
+      gu: "દરેક સ્ક્રીન નીચેના + અને − બટનથી પ્રશ્ન ઉમેરવા કે કાઢવાનું સૂચન કરો."
+    },
+    "intro.howToUse.6": {
+      en: "Save your work as a named version to come back to later, and tap Send to NBF when ready — opens WhatsApp with everything compiled.",
+      gu: "તમારા કામને નામ આપીને સેવ કરો, પછી તૈયાર થાય ત્યારે Send to NBF દબાવો — WhatsApp પર બધું ભેગું થઈને ખુલશે."
+    },
+    "intro.howToUse.footer": {
+      en: "Nothing is shared until you tap Send. You can reopen this intro anytime from the ⓘ button at the top.",
+      gu: "જ્યાં સુધી Send નહીં દબાવો ત્યાં સુધી કંઈ શેર નહીં થાય. આ પરિચય ઉપરના ⓘ બટનથી ગમે ત્યારે ફરી ખોલી શકો."
+    },
+    "intro.startBtn": { en: "Start reviewing", gu: "સમીક્ષા શરૂ કરો" },
+    "ui.back":       { en: "Back", gu: "પાછળ" },
+    "ui.next":       { en: "Next", gu: "આગળ" },
+    "ui.footer":     { en: "Your notes and suggestions are saved on your device. Nothing is shared until you tap Send.",
+                       gu: "તમારી નોંધ અને સૂચનો તમારા ફોન પર જ સેવ થાય છે. જ્યાં સુધી મોકલો દબાવશો નહીં ત્યાં સુધી કંઈ શેર નહીં થાય." },
+    "ui.edit":       { en: "Edit Gujarati", gu: "ગુજરાતી સુધારો" },
+    "ui.versions":   { en: "Versions", gu: "વર્ઝન" },
+    "ui.sendBtn":    { en: "Send to NBF", gu: "NBF ને મોકલો" },
+    "ui.notesTitle": { en: "Your notes on this screen", gu: "આ સ્ક્રીન પર તમારી નોંધ" },
+    "ui.notesHint":  { en: "saved on your device", gu: "તમારા ફોન પર જ સેવ થાય છે" },
+    "ui.notesPh":    { en: "What do you think about this screen? Flag a concern, suggest a change, or ask a question.",
+                       gu: "આ સ્ક્રીન વિશે શું લાગે છે? ચિંતા જણાવો, બદલાવ સૂચવો, કે પ્રશ્ન પૂછો." },
+    "ui.structTitle":{ en: "Suggest changes to this screen", gu: "આ સ્ક્રીન પર ફેરફાર સૂચવો" },
+    "ui.structHint": { en: "add or remove questions", gu: "પ્રશ્ન ઉમેરો કે કાઢો" },
+    "ui.addQ":       { en: "Add a question", gu: "પ્રશ્ન ઉમેરો" },
+    "ui.deleteQ":    { en: "Delete a question", gu: "પ્રશ્ન કાઢો" },
+    "ui.noSuggests": { en: "No structural suggestions on this screen yet.", gu: "આ સ્ક્રીન પર હજી કોઈ ફેરફારનું સૂચન નથી." },
+    "ui.addQModalTitle": { en: "Add a question to this screen", gu: "આ સ્ક્રીન પર પ્રશ્ન ઉમેરો" },
+    "ui.addQText":   { en: "What question should be added?", gu: "કયો પ્રશ્ન ઉમેરવો જોઈએ?" },
+    "ui.addQWhere":  { en: "Where should it go?", gu: "ક્યાં મૂકવો જોઈએ?" },
+    "ui.addQReason": { en: "Why?", gu: "કારણ?" },
+    "ui.optional":   { en: " (optional)", gu: " (વૈકલ્પિક)" },
+    "ui.cancel":     { en: "Cancel", gu: "રદ કરો" },
+    "ui.add":        { en: "Add suggestion", gu: "સૂચન ઉમેરો" },
+    "ui.delQModalTitle": { en: "Suggest deleting a question", gu: "પ્રશ્ન કાઢવાનું સૂચન" },
+    "ui.delQPick":   { en: "Which questions should be removed? (tick all that apply)", gu: "કયા પ્રશ્ન કાઢવા જોઈએ? (જે લાગુ પડે તે બધા પર ટિક કરો)" },
+    "ui.delQReason": { en: "Why?", gu: "કારણ?" },
+    "ui.suggestDelete": { en: "Suggest deletion", gu: "કાઢવાનું સૂચન કરો" },
+    "ui.posStart":   { en: "At the start of the screen", gu: "સ્ક્રીનની શરૂઆતમાં" },
+    "ui.posEnd":     { en: "At the end of the screen", gu: "સ્ક્રીનના અંતે" },
+    "ui.posBefore":  { en: "Before: ", gu: "આ પહેલાં: " },
+    "ui.posAfter":   { en: "After: ", gu: "આ પછી: " },
+    "ui.editorTitle":{ en: "Edit Gujarati translations", gu: "ગુજરાતી ભાષાંતર સુધારો" },
+    "ui.editorIntro":{ en: "Edit any Gujarati text to use more natural, everyday Gujarati — the way Aagewans and applicants actually speak. Your edits are saved on this device only. Use the Send to NBF button to share them. English is shown for reference. Reset reverts to the AI-drafted default.",
+                       gu: "કોઈ પણ ગુજરાતી શબ્દ બદલો જે આગેવાનો અને અરજી કરનારા ખરેખર બોલે છે તેવી સામાન્ય ભાષા વાપરવા માટે. તમારા ફેરફાર તમારા ફોન પર જ સેવ થાય છે. NBF ને મોકલવા માટે 'મોકલો' બટન વાપરો. અંગ્રેજી સંદર્ભ માટે બતાવ્યું છે. 'રીસેટ' દબાવવાથી મૂળ પર પાછા જશો." },
+    "ui.versionsTitle": { en: "Saved versions", gu: "સેવ કરેલા વર્ઝન" },
+    "ui.versionsIntro": { en: "Save a snapshot of your current notes, Gujarati edits and suggestions as a named version. Switch between versions anytime. Each is kept on this device only.",
+                          gu: "તમારી અત્યારની નોંધ, ગુજરાતી ફેરફાર અને સૂચનોને નામ આપીને સેવ કરો. ગમે ત્યારે વર્ઝન બદલી શકો. દરેક ફક્ત આ ફોન પર જ છે." },
+    "ui.saveNew":    { en: "Save as new version", gu: "નવા વર્ઝન તરીકે સેવ કરો" },
+    "ui.newVersionPh": { en: "Name this version (e.g. 'Oct 11 SEWA meeting')", gu: "વર્ઝનનું નામ (દા.ત. '૧૧ ઓક્ટો SEWA મીટિંગ')" },
+    "ui.noVersions": { en: "No saved versions yet.", gu: "હજી કોઈ વર્ઝન સેવ કર્યું નથી." },
+    "ui.loadVersion":{ en: "Load", gu: "ખોલો" },
+    "ui.sendVersion":{ en: "Send to NBF", gu: "NBF ને મોકલો" },
+    "ui.deleteVersion": { en: "Delete", gu: "કાઢી નાંખો" },
+    "ui.vStats":     { en: "notes · edits · suggestions", gu: "નોંધ · ફેરફાર · સૂચનો" },
+    "ui.sendModalTitle": { en: "Send feedback to NBF via WhatsApp", gu: "WhatsApp દ્વારા NBF ને મોકલો" },
+    "ui.sendYourName": { en: "Your name (optional)", gu: "તમારું નામ (વૈકલ્પિક)" },
+    "ui.sendYourNamePh": { en: "e.g. Lataben (SEWA Gomtipur)", gu: "દા.ત. લતાબેન (SEWA ગોમતીપુર)" },
+    "ui.sendIncludeNotes": { en: "Include notes", gu: "નોંધો સામેલ કરો" },
+    "ui.sendIncludeEdits": { en: "Include Gujarati edits", gu: "ગુજરાતી ફેરફાર સામેલ કરો" },
+    "ui.sendIncludeSuggests": { en: "Include structural suggestions", gu: "ફેરફારના સૂચનો સામેલ કરો" },
+    "ui.sendNothingYet": { en: "You haven't added any notes, edits or suggestions yet.", gu: "તમે હજી કોઈ નોંધ, ફેરફાર કે સૂચન ઉમેર્યું નથી." },
+    "ui.sendPreview": { en: "Preview of WhatsApp message:", gu: "WhatsApp સંદેશનો પ્રિવ્યૂ:" },
+    "ui.sendCharCount": { en: "characters", gu: "અક્ષરો" },
+    "ui.sendTooLong": { en: "Message is long — WhatsApp may truncate. Consider sending in two batches.", gu: "સંદેશ મોટો છે — WhatsApp કદાચ કાપી નાંખશે. બે ભાગમાં મોકલવું." },
+    "ui.sendViaWa":  { en: "Open WhatsApp", gu: "WhatsApp ખોલો" },
+    "ui.working":    { en: "Working on", gu: "કામ ચાલુ છે" },
+    "ui.unsaved":    { en: "unsaved working version", gu: "અનસેવ્ડ કાર્યકારી વર્ઝન" },
+    "ui.loaded":     { en: "loaded from", gu: "અહીંથી લોડ થયું" },
+    "ui.confirmLoad": { en: "Load this version? Your current notes/edits/suggestions will be replaced.", gu: "આ વર્ઝન ખોલવું? તમારી અત્યારની નોંધ/ફેરફાર/સૂચનો બદલાઈ જશે." },
+    "ui.confirmDelete": { en: "Delete this version? This cannot be undone.", gu: "આ વર્ઝન કાઢવું? પાછું લાવી શકાશે નહીં." },
+    "ui.saved":      { en: "Saved", gu: "સેવ થયું" },
+    "ui.reset":      { en: "Reset to default", gu: "રીસેટ કરો" },
+    "ui.save":       { en: "Save", gu: "સેવ કરો" },
+
+    // --- SCENE 1 ---
+    "s1.caption": { en: "Opening", gu: "શરૂઆત" },
+    "s1.title":   { en: "The Aagewan opens the chat", gu: "આગેવાન ચેટ ખોલે છે" },
+    "s1.desc":    { en: "When Lataben opens the NBF Pilot WhatsApp, she sees a greeting and four big tappable options. No typing required to start.",
+                    gu: "જ્યારે લતાબેન NBF પાયલટ વૉટ્સએપ ખોલે છે, ત્યારે તેમને નમસ્કાર અને ચાર મોટા બટન દેખાય છે. શરૂ કરવા માટે લખવું જરૂરી નથી." },
+    "s1.notes":   { en: `<p>The default state carries only what she needs: start a new application, resume one of two drafts she has already begun, see her completed applications, or ask for help.</p><p>Note the <strong>Resume a draft (2)</strong> count. Aagewans will often start an application in a home, be interrupted, and continue later.</p><span class="noted">Open question: should the greeting use her first name only, or more formally? And is <em>Namaste</em> right for mixed Hindu/Muslim households?</span>`,
+                    gu: `<p>શરૂઆતમાં ફક્ત જે જોઈએ તે જ દેખાય છે: નવી અરજી, પહેલેથી શરૂ કરેલા ડ્રાફ્ટ, અરજીઓ, મદદ.</p><p><strong>ડ્રાફ્ટ ચાલુ કરો (2)</strong> નંબર જુઓ. આગેવાન ઘણીવાર ઘરે શરૂ કરશે, પછી પૂરી કરશે.</p><span class="noted">પ્રશ્ન: પહેલું નામ કે ઔપચારિક? હિન્દુ-મુસ્લિમ ઘરોમાં <em>નમસ્તે</em> બરાબર છે?</span>` },
+    "s1.chat.date":    { en: "Today", gu: "આજે" },
+    "s1.chat.greet":   { en: "Namaste Lataben. 🙏", gu: "નમસ્તે લતાબેન. 🙏" },
+    "s1.chat.q":       { en: "What would you like to do?", gu: "શું કરવું છે?" },
+    "s1.chat.btn1":    { en: "▶ Start a new application", gu: "▶ નવી અરજી ચાલુ કરો" },
+    "s1.chat.btn2":    { en: "⟳ Resume a draft (2)", gu: "⟳ ડ્રાફ્ટ પૂરો કરો (2)" },
+    "s1.chat.btn3":    { en: "📋 My applications", gu: "📋 મારી અરજીઓ" },
+    "s1.chat.btn4":    { en: "? Help", gu: "? મદદ" },
+
+    // --- SCENE 2 ---
+    "s2.caption": { en: "Pre-screen", gu: "પહેલી તપાસ" },
+    "s2.title":   { en: "Four questions decide whether to go further", gu: "ચાર પ્રશ્નો નક્કી કરે છે કે આગળ વધવું કે નહીં" },
+    "s2.desc":    { en: "If every answer is YES, the full application opens. If any is NO, the Aagewan is prompted to close out gently with referral options.",
+                    gu: "જો બધા જવાબ હા હોય, આખી અરજી ખુલશે. કોઈ ના હોય તો આગેવાનને સમજાવવા કહેવાશે." },
+    "s2.notes":   { en: `<p>Yes/No buttons are chosen deliberately over typing. The Aagewan is talking to the family — one tap keeps her in the conversation.</p><p>The dot progress indicator shows how far through the pre-screen she is. Four questions take under a minute.</p><span class="noted">What exactly counts as "struggling for food"? Likely the Aagewan's judgement — but we may want a one-line guideline.</span>`,
+                    gu: `<p>લખવા કરતાં હા/ના બટન જાણીજોઈને રાખ્યા છે. આગેવાન પરિવાર સાથે વાત કરી રહી છે — એક ટૅપ થી વાતચીતમાં જ રહે.</p><p>ટપકાં દેખાડે છે કે આગેવાન ક્યાં પહોંચી છે. ચાર પ્રશ્ન એક મિનિટથી ઓછા.</p><span class="noted">"ખોરાકની તકલીફ" શું ગણાય? કદાચ આગેવાનનો નિર્ણય — પણ એક લાઇનની માર્ગદર્શિકા મળે તો સારું.</span>` },
+    "s2.chat.chosen":  { en: "▶ Start a new application", gu: "▶ નવી અરજી ચાલુ કરો" },
+    "s2.chat.intro":   { en: "Quick check — 4 questions to see if this family fits.", gu: "ઝડપી તપાસ — આ પરિવાર યોગ્ય છે કે નહીં તે જોવા 4 પ્રશ્ન." },
+    "s2.chat.prog":    { en: "Question 1 of 4", gu: "4માંથી 1મો પ્રશ્ન" },
+    "s2.chat.q":       { en: "Has at least one parent of the children in this household died?", gu: "આ ઘરના બાળકોના ઓછામાં ઓછા એક માતા-પિતા ગુજરી ગયા છે?" },
+    "s2.chat.yes":     { en: "YES", gu: "હા" },
+    "s2.chat.no":      { en: "NO", gu: "ના" },
+
+    // --- SCENE 3 ---
+    "s3.caption": { en: "Text input", gu: "લખાણ દાખલ કરવું" },
+    "s3.title":   { en: "Typing is optional. Speaking is enough.", gu: "લખવું જરૂરી નથી. બોલવું પૂરતું છે." },
+    "s3.desc":    { en: "For every free-text question, the Aagewan sees the familiar WhatsApp microphone pulsing. She can speak the answer — the system transcribes.",
+                    gu: "દરેક લખવાના પ્રશ્ન માટે આગેવાનને જાણીતો વૉટ્સએપ માઇક દેખાય છે. તે બોલીને જવાબ આપી શકે છે." },
+    "s3.notes":   { en: `<p>The green bar at the top of the bubble tells her where she is in the application. Section labels orient without navigation.</p><p>The italic line gives micro-guidance where helpful.</p><span class="noted">For an Aagewan with limited literacy, voice is a lifeline. We should pressure-test Gujarati transcription before launch.</span>`,
+                    gu: `<p>બબલની ઉપરની લીલી પટ્ટી જણાવે છે કે આગેવાન ક્યાં છે. વિભાગના નામથી દિશા મળે છે.</p><p>ત્રાંસી લાઇન જ્યાં જરૂરી હોય ત્યાં નાની મદદ આપે છે.</p><span class="noted">ઓછું વાંચતા-લખતા આવડે તેમના માટે બોલવું બહુ મહત્વનું. લૉન્ચ પહેલાં ગુજરાતી ટ્રાન્સક્રિપ્શન ચકાસવું જોઈએ.</span>` },
+    "s3.chat.pass":    { en: "The family fits. ✓ Starting full application. You can pause anytime by sending PAUSE.", gu: "પરિવાર યોગ્ય છે. ✓ આખી અરજી ચાલુ કરીએ છીએ. ગમે ત્યારે PAUSE મોકલીને રોકી શકો." },
+    "s3.chat.sec":     { en: "Section A — About the caregiver", gu: "વિભાગ અ — સંભાળ રાખનાર વિશે" },
+    "s3.chat.q":       { en: "What is the caregiver's full name?", gu: "સંભાળ રાખનારનું આખું નામ શું છે?" },
+    "s3.chat.hint":    { en: "Type the name, or tap the mic to record a voice note.", gu: "નામ લખો, અથવા બોલવા માટે માઇક દબાવો." },
+
+    // --- SCENE 4 ---
+    "s4.caption": { en: "Per-child questions", gu: "દરેક બાળક માટે પ્રશ્ન" },
+    "s4.title":   { en: "One child at a time, with progress visible", gu: "એક બાળક પર એક, પ્રગતિ દેખાય તેમ" },
+    "s4.desc":    { en: "When the household has multiple children, the form repeats itself per child. The Aagewan can see where she is (Child 2 of 3) and which answers she's already given.",
+                    gu: "જો ઘરમાં ઘણા બાળકો હોય, ફોર્મ દરેક બાળક માટે ફરી આવે છે. આગેવાન જોઈ શકે છે કે ક્યાં છે અને કયા જવાબ પહેલેથી આપ્યા." },
+    "s4.notes":   { en: `<p>Priya's details appear in a confirmation bubble so Lataben can see what she's committed to without scrolling.</p><p>The progress dots show that the per-child block has three repetitions.</p><span class="noted">For families with many children, this section is the longest in the form. Worth considering whether we can compress.</span>`,
+                    gu: `<p>પ્રિયાની વિગત કન્ફર્મેશન બબલમાં દેખાય છે, જેથી સ્ક્રોલ કર્યા વગર જોઈ શકે.</p><p>પ્રગતિના ટપકાં બતાવે છે કે બાળક દીઠ ત્રણ વાર પુનરાવર્તન છે.</p><span class="noted">ઘણા બાળકોવાળા પરિવાર માટે આ વિભાગ સૌથી લાંબો થાય છે. નાનું કરવું વિચારવા જેવું.</span>` },
+    "s4.chat.sec":     { en: "Section B — About the children", gu: "વિભાગ બ — બાળકો વિશે" },
+    "s4.chat.lead":    { en: "We'll go one child at a time.", gu: "એક બાળક પર એક કરીશું." },
+    "s4.chat.done":    { en: "Child 1 ✓", gu: "1મું બાળક ✓" },
+    "s4.chat.child1":  { en: "Priya, age 11, granddaughter", gu: "પ્રિયા, ઉંમર 11, દીકરાની દીકરી" },
+    "s4.chat.prog":    { en: "Child 2 of 3", gu: "3માંથી 2જું બાળક" },
+    "s4.chat.q":       { en: "Name of the second child?", gu: "બીજા બાળકનું નામ?" },
+
+    // --- SCENE 5 ---
+    "s5.caption": { en: "Documents", gu: "દસ્તાવેજો" },
+    "s5.title":   { en: "Only tick what the family actually has", gu: "જે ખરેખર પરિવાર પાસે હોય તે જ ટિક કરો" },
+    "s5.desc":    { en: "A checklist of standard documents. The Aagewan taps each the family can produce. After DONE, the form captures a photo of each ticked item.",
+                    gu: "સામાન્ય દસ્તાવેજોની યાદી. પરિવાર પાસે જે હોય તે આગેવાન ટૅપ કરે. DONE પછી, દરેક ટિક કરેલા દસ્તાવેજનો ફોટો." },
+    "s5.notes":   { en: `<p>Showing a <em>realistic</em> state here. Four of seven documents are ticked. Father's death certificate is missing (common).</p><p>Missing documents are not disqualifying. The verification step decides what alternatives are acceptable.</p><span class="noted">We should test this with Aagewans — do they understand that unticked items are OK?</span>`,
+                    gu: `<p>અહીં <em>વાસ્તવિક</em> સ્થિતિ. સાતમાંથી ચાર ટિક કરેલા. પિતાનું મૃત્યુ પ્રમાણપત્ર નથી (સામાન્ય).</p><p>દસ્તાવેજ ન હોય તો ના પડતી નથી. ચકાસણીમાં નક્કી થાય કે બીજા પુરાવા સ્વીકાર્ય છે કે નહીં.</p><span class="noted">આગેવાનો સાથે ચકાસવું — શું સમજે છે કે ખાલી રાખેલા દસ્તાવેજ ચાલે?</span>` },
+    "s5.chat.sec":     { en: "Section H — Documents", gu: "વિભાગ હ — દસ્તાવેજો" },
+    "s5.chat.q":       { en: "Which documents does the family have at home? Tap all that apply, then DONE.", gu: "પરિવાર પાસે ઘરે કયા દસ્તાવેજ છે? જે હોય તે બધા પર ટૅપ કરો, પછી DONE." },
+    "s5.chat.d1":      { en: "Aadhar — caregiver", gu: "આધાર — સંભાળ રાખનાર" },
+    "s5.chat.d2":      { en: "Aadhar — children", gu: "આધાર — બાળકોના" },
+    "s5.chat.d3":      { en: "Ration card (BPL)", gu: "રેશન કાર્ડ (BPL)" },
+    "s5.chat.d4":      { en: "Death certificate — father", gu: "મૃત્યુ પ્રમાણપત્ર — પિતા" },
+    "s5.chat.d5":      { en: "Death certificate — mother", gu: "મૃત્યુ પ્રમાણપત્ર — માતા" },
+    "s5.chat.d6":      { en: "Disability certificate", gu: "વિકલાંગતા પ્રમાણપત્ર" },
+    "s5.chat.d7":      { en: "School records", gu: "સ્કૂલના કાગળો" },
+    "s5.chat.done":    { en: "DONE", gu: "થઈ ગયું" },
+
+    // --- SCENE 6 ---
+    "s6.caption": { en: "Photo capture", gu: "ફોટો લેવો" },
+    "s6.title":   { en: "Photos are offered, never pressed", gu: "ફોટો માંગવામાં આવે, દબાણ નહીં" },
+    "s6.desc":    { en: "Three photos are requested in sequence: home exterior, home interior, and (if the family consents) a family photo. Each has a SKIP button.",
+                    gu: "ત્રણ ફોટો: ઘરની બહારનો, અંદરનો, અને (જો સંમત હોય) પરિવારનો. દરેક સાથે SKIP બટન." },
+    "s6.notes":   { en: `<p>The italic line <strong>Only if the applicant is comfortable</strong> is instruction to the Aagewan: ask, don't just take.</p><p>The camera button opens the phone's camera within WhatsApp — familiar flow.</p><span class="noted">Photos of children specifically need SEWA's view — is it ever appropriate?</span>`,
+                    gu: `<p>ત્રાંસી લાઇન <strong>જો અરજી કરનારને આરામ હોય તો જ</strong> આગેવાન માટે સૂચના છે: પૂછો, સીધો ફોટો ન લો.</p><p>કૅમેરા બટનથી વૉટ્સએપની અંદર કૅમેરા ખુલે છે.</p><span class="noted">બાળકોના ફોટો વિશે SEWAનો અભિપ્રાય જોઈએ — શું યોગ્ય છે?</span>` },
+    "s6.chat.sec":     { en: "Section I — Photos (2 of 3)", gu: "વિભાગ ઈ — ફોટો (3માંથી 2જો)" },
+    "s6.chat.q":       { en: "Please take a photo of the home exterior.", gu: "ઘરની બહારનો ફોટો લો." },
+    "s6.chat.hint":    { en: "Only if the applicant is comfortable. You can skip any photo.", gu: "જો અરજી કરનારને આરામ હોય તો જ. કોઈ પણ ફોટો છોડી શકાય." },
+    "s6.chat.tap":     { en: "Tap to open camera", gu: "કૅમેરા ખોલવા દબાવો" },
+    "s6.chat.skip":    { en: "⏭ SKIP THIS PHOTO", gu: "⏭ આ ફોટો છોડો" },
+
+    // --- SCENE 7 ---
+    "s7.caption": { en: "Consent", gu: "સંમતિ" },
+    "s7.title":   { en: "The applicant's own voice is the consent", gu: "અરજી કરનારનો પોતાનો અવાજ એ સંમતિ છે" },
+    "s7.desc":    { en: "The Aagewan reads a short script and records the caregiver's spoken agreement. If audio is declined, the written-note fallback is one tap away.",
+                    gu: "આગેવાન ટૂંકી સ્ક્રિપ્ટ વાંચે અને સંભાળ રાખનારની બોલેલી સંમતિ રેકોર્ડ કરે. જો ઑડિયો ન ચાલે, લખેલી નોંધ વિકલ્પ એક ટૅપ દૂર." },
+    "s7.notes":   { en: `<p>The script is short on purpose — a single sentence the caregiver can hear and respond to.</p><p>The record button uses the universal hold-to-record pattern Aagewans know from WhatsApp.</p><span class="noted">The exact wording is pending counsel's DPDP guidance.</span>`,
+                    gu: `<p>સ્ક્રિપ્ટ ટૂંકી રાખી છે — એક વાક્ય જે સંભાળ રાખનાર સાંભળી અને જવાબ આપી શકે.</p><p>રેકોર્ડ બટન દબાવી રાખીને રેકોર્ડ કરવાની રીત વાપરે છે, જે આગેવાનો વૉટ્સએપથી જાણે છે.</p><span class="noted">ચોક્કસ શબ્દ કાઉન્સેલની DPDP સલાહ પર નિર્ભર.</span>` },
+    "s7.chat.sec":     { en: "Section J — Consent", gu: "વિભાગ જ — સંમતિ" },
+    "s7.chat.lead":    { en: "Please read the consent script to Kokilaben, then record her response.", gu: "કોકિલાબેનને સંમતિ સ્ક્રિપ્ટ વાંચીને સંભળાવો, પછી તેમનો જવાબ રેકોર્ડ કરો." },
+    "s7.chat.script":  { en: `"The Foundation would like to consider supporting your family with your grandchildren's school and food. Do you agree that I share the information we've discussed today, so they can decide?"`, gu: `"ફાઉન્ડેશન તમારા પરિવારને તમારા પૌત્ર-પૌત્રીની સ્કૂલ અને ખોરાકમાં મદદ કરવા વિચારી રહી છે. આજે આપણે જે વાત કરી તે હું શેર કરું, જેથી તેઓ નિર્ણય લઈ શકે — શું સંમત છો?"` },
+    "s7.chat.fullBtn": { en: "▶ Tap for full script", gu: "▶ આખી સ્ક્રિપ્ટ માટે દબાવો" },
+    "s7.chat.recHint": { en: "Hold to record her consent", gu: "સંમતિ રેકોર્ડ કરવા દબાવી રાખો" },
+    "s7.chat.noteBtn": { en: "📝 Written note instead", gu: "📝 તેના બદલે લખેલી નોંધ" },
+
+    // --- SCENE 8 ---
+    "s8.caption": { en: "Review", gu: "સમીક્ષા" },
+    "s8.title":   { en: "Everything on one screen before it leaves her hands", gu: "મોકલતા પહેલાં બધું એક સ્ક્રીન પર" },
+    "s8.desc":    { en: "The Aagewan sees a compact summary. Three choices: submit, edit a specific section, or save as draft to resume later.",
+                    gu: "આગેવાનને ટૂંકો સારાંશ દેખાય. ત્રણ વિકલ્પ: મોકલો, વિભાગ સુધારો, કે ડ્રાફ્ટ સેવ કરો." },
+    "s8.notes":   { en: `<p>The summary is grouped by section with headers in trust green. Numbers carry what is captured without opening each one.</p><p>Tapping Edit opens a list of sections. Tapping Save draft puts the application in Resume drafts.</p><span class="noted">The summary format will need review once we see real applications.</span>`,
+                    gu: `<p>સારાંશ વિભાગ-પ્રમાણે ગોઠવ્યો છે. નંબરો દરેક ખોલ્યા વગર શું ભેગું કર્યું તે બતાવે છે.</p><p>Edit દબાવતાં વિભાગોની યાદી. Save draft દબાવતાં ડ્રાફ્ટ યાદીમાં જાય છે.</p><span class="noted">સારાંશનું ફોર્મેટ ખરેખરની અરજીઓ જોયા પછી ફરી જોવું પડશે.</span>` },
+    "s8.chat.lead":    { en: "Review before submitting", gu: "મોકલતા પહેલાં સમીક્ષા" },
+    "s8.chat.sh1":     { en: "Caregiver", gu: "સંભાળ રાખનાર" },
+    "s8.chat.k1":      { en: "Name", gu: "નામ" }, "s8.chat.v1": { en: "Kokilaben S. Patel", gu: "કોકિલાબેન સ. પટેલ" },
+    "s8.chat.k2":      { en: "Age", gu: "ઉંમર" }, "s8.chat.v2": { en: "68", gu: "68" },
+    "s8.chat.k3":      { en: "Locality", gu: "વિસ્તાર" }, "s8.chat.v3": { en: "Gomtipur", gu: "ગોમતીપુર" },
+    "s8.chat.sh2":     { en: "Household", gu: "ઘર" },
+    "s8.chat.k4":      { en: "Children", gu: "બાળકો" }, "s8.chat.v4": { en: "3 (Priya 11, Jigar 9, Meera 6)", gu: "3 (પ્રિયા 11, જિગર 9, મીરા 6)" },
+    "s8.chat.k5":      { en: "Other adults", gu: "બીજા મોટા" }, "s8.chat.v5": { en: "None", gu: "કોઈ નહીં" },
+    "s8.chat.sh3":     { en: "Status", gu: "સ્થિતિ" },
+    "s8.chat.k6":      { en: "Parents", gu: "માતા-પિતા" }, "s8.chat.v6": { en: "Both deceased (2024)", gu: "બંને ગુજરી ગયા (2024)" },
+    "s8.chat.k7":      { en: "School", gu: "સ્કૂલ" }, "s8.chat.v7": { en: "Jigar out since Jun", gu: "જિગર જૂનથી સ્કૂલ બહાર" },
+    "s8.chat.k8":      { en: "Food", gu: "ખોરાક" }, "s8.chat.v8": { en: "2 meals/day · BPL", gu: "2 ભોજન/દિન · BPL" },
+    "s8.chat.sh4":     { en: "Captured", gu: "લીધેલું" },
+    "s8.chat.k9":      { en: "Documents", gu: "દસ્તાવેજ" }, "s8.chat.v9": { en: "4 of 7", gu: "7માંથી 4" },
+    "s8.chat.k10":     { en: "Photos", gu: "ફોટો" }, "s8.chat.v10": { en: "3 of 3", gu: "3માંથી 3" },
+    "s8.chat.k11":     { en: "Consent", gu: "સંમતિ" }, "s8.chat.v11": { en: "Audio ✓", gu: "ઑડિયો ✓" },
+    "s8.chat.k12":     { en: "Voucher", gu: "સાક્ષી" }, "s8.chat.v12": { en: "Not nominated", gu: "નામ આપ્યું નથી" },
+    "s8.chat.submit":  { en: "✓ SUBMIT", gu: "✓ મોકલો" },
+    "s8.chat.edit":    { en: "✏ Edit", gu: "✏ સુધારો" },
+    "s8.chat.draft":   { en: "💾 Save draft", gu: "💾 ડ્રાફ્ટ સેવ કરો" },
+
+    // --- SCENE 9 ---
+    "s9.caption": { en: "Confirmation", gu: "સ્વીકૃતિ" },
+    "s9.title":   { en: "A reference number and what happens next", gu: "એક રેફરન્સ નંબર અને આગળ શું થશે તે" },
+    "s9.desc":    { en: "The application is submitted. Lataben sees a thank-you, a reference number, and a clear next-step promise.",
+                    gu: "અરજી મોકલાઈ. લતાબેનને આભાર, રેફરન્સ નંબર, અને સ્પષ્ટ વચન દેખાય." },
+    "s9.notes":   { en: `<p>The reference number is intentionally memorable — year, month, sequence.</p><p>The two-working-days commitment is the first concrete expectation set with the Aagewan.</p><span class="noted">Downstream messages (approval/decision updates) are a next piece of work.</span>`,
+                    gu: `<p>રેફરન્સ નંબર જાણીજોઈને યાદ રહે તેવો — વર્ષ, મહિનો, ક્રમ.</p><p>બે કામકાજી દિવસનું વચન આગેવાન સાથે બાંધેલી પહેલી ચોક્કસ અપેક્ષા.</p><span class="noted">પછીના સંદેશા (મંજૂરી/નિર્ણય) આગળનું કામ.</span>` },
+    "s9.chat.chosen":  { en: "✓ SUBMIT", gu: "✓ મોકલો" },
+    "s9.chat.thanks":  { en: "Thank you, Lataben.", gu: "આભાર, લતાબેન." },
+    "s9.chat.body":    { en: "Application for Kokilaben Patel's family has been submitted.", gu: "કોકિલાબેન પટેલના પરિવારની અરજી મોકલાઈ ગઈ છે." },
+    "s9.chat.next":    { en: "The SEWA supervisor will review within 2 working days. We will message you with the next step.", gu: "SEWA સુપરવાઇઝર 2 કામકાજી દિવસમાં સમીક્ષા કરશે. આગળનું પગલું સંદેશો આવશે." },
+    "s9.chat.hint":    { en: "You can start a new application anytime by tapping below.", gu: "નીચે દબાવીને ગમે ત્યારે નવી અરજી શરૂ કરી શકો." },
+    "s9.chat.again":   { en: "▶ Start another", gu: "▶ બીજી શરૂ કરો" },
+  };
+
+  // All editable translation keys, grouped
+  const EDITOR_GROUPS = [
+    { title: "Page UI", keys: ["ui.eyebrow","ui.title","ui.lede","ui.where","ui.footer"] },
+    { title: "Scene 1 — Opening", keys: ["s1.caption","s1.title","s1.desc","s1.notes","s1.chat.date","s1.chat.greet","s1.chat.q","s1.chat.btn1","s1.chat.btn2","s1.chat.btn3","s1.chat.btn4"] },
+    { title: "Scene 2 — Pre-screen", keys: ["s2.caption","s2.title","s2.desc","s2.notes","s2.chat.chosen","s2.chat.intro","s2.chat.prog","s2.chat.q","s2.chat.yes","s2.chat.no"] },
+    { title: "Scene 3 — Text input", keys: ["s3.caption","s3.title","s3.desc","s3.notes","s3.chat.pass","s3.chat.sec","s3.chat.q","s3.chat.hint"] },
+    { title: "Scene 4 — Per-child", keys: ["s4.caption","s4.title","s4.desc","s4.notes","s4.chat.sec","s4.chat.lead","s4.chat.done","s4.chat.child1","s4.chat.prog","s4.chat.q"] },
+    { title: "Scene 5 — Documents", keys: ["s5.caption","s5.title","s5.desc","s5.notes","s5.chat.sec","s5.chat.q","s5.chat.d1","s5.chat.d2","s5.chat.d3","s5.chat.d4","s5.chat.d5","s5.chat.d6","s5.chat.d7","s5.chat.done"] },
+    { title: "Scene 6 — Photo", keys: ["s6.caption","s6.title","s6.desc","s6.notes","s6.chat.sec","s6.chat.q","s6.chat.hint","s6.chat.tap","s6.chat.skip"] },
+    { title: "Scene 7 — Consent", keys: ["s7.caption","s7.title","s7.desc","s7.notes","s7.chat.sec","s7.chat.lead","s7.chat.script","s7.chat.fullBtn","s7.chat.recHint","s7.chat.noteBtn"] },
+    { title: "Scene 8 — Review", keys: ["s8.caption","s8.title","s8.desc","s8.notes","s8.chat.lead","s8.chat.sh1","s8.chat.k1","s8.chat.v1","s8.chat.k2","s8.chat.v2","s8.chat.k3","s8.chat.v3","s8.chat.sh2","s8.chat.k4","s8.chat.v4","s8.chat.k5","s8.chat.v5","s8.chat.sh3","s8.chat.k6","s8.chat.v6","s8.chat.k7","s8.chat.v7","s8.chat.k8","s8.chat.v8","s8.chat.sh4","s8.chat.k9","s8.chat.v9","s8.chat.k10","s8.chat.v10","s8.chat.k11","s8.chat.v11","s8.chat.k12","s8.chat.v12","s8.chat.submit","s8.chat.edit","s8.chat.draft"] },
+    { title: "Scene 9 — Confirmation", keys: ["s9.caption","s9.title","s9.desc","s9.notes","s9.chat.chosen","s9.chat.thanks","s9.chat.body","s9.chat.next","s9.chat.hint","s9.chat.again"] },
+  ];
+
+  // "Question" keys per scene — subset of chat keys that are user-facing questions/buttons/items.
+  // Used in Delete-question picker.
+  const SCENE_QUESTIONS = {
+    s1: ["s1.chat.greet","s1.chat.q","s1.chat.btn1","s1.chat.btn2","s1.chat.btn3","s1.chat.btn4"],
+    s2: ["s2.chat.intro","s2.chat.q"],
+    s3: ["s3.chat.pass","s3.chat.q","s3.chat.hint"],
+    s4: ["s4.chat.lead","s4.chat.child1","s4.chat.q"],
+    s5: ["s5.chat.q","s5.chat.d1","s5.chat.d2","s5.chat.d3","s5.chat.d4","s5.chat.d5","s5.chat.d6","s5.chat.d7"],
+    s6: ["s6.chat.q","s6.chat.hint","s6.chat.skip"],
+    s7: ["s7.chat.lead","s7.chat.script","s7.chat.noteBtn"],
+    s8: Object.keys(T).filter(k => k.startsWith("s8.chat.")),
+    s9: ["s9.chat.thanks","s9.chat.body","s9.chat.next","s9.chat.again"],
+  };
+
+  const scenes = [
+    { id: "s1", battery: 12, time: "10:24" },
+    { id: "s2", battery: 11, time: "10:25" },
+    { id: "s3", battery: 10, time: "10:27", micPulse: true },
+    { id: "s4", battery: 9,  time: "10:34" },
+    { id: "s5", battery: 8,  time: "10:52" },
+    { id: "s6", battery: 7,  time: "11:04" },
+    { id: "s7", battery: 6,  time: "11:14" },
+    { id: "s8", battery: 5,  time: "11:28" },
+    { id: "s9", battery: 4,  time: "11:29" },
+  ];
+
+  // ============================================================
+  // LOCAL STATE (localStorage)
+  // ============================================================
+  // Working state (current unsaved):
+  //   { translations: {key: text}, notes: {sceneId: text}, suggestions: [...] }
+  // Saved versions list: array of {id, name, savedAt, state}
+  // Preferences: lang, lastSceneIdx, loadedFrom (version id if loaded)
+  let state = {
+    translations: {},
+    notes: {},
+    suggestions: [], // {id, sceneId, type, text?, position?, targets?, reason, createdAt}
+  };
+  let loadedFromVersionId = null;
+  let currentLang = "en";
+  let currentIndex = 0;
+
+  function readPrefs() {
+    try {
+      const p = localStorage.getItem(STORAGE_KEY + "_prefs");
+      if (p) {
+        const parsed = JSON.parse(p);
+        if (parsed.lang) currentLang = parsed.lang;
+      }
+    } catch (e) {}
+  }
+  function savePrefs() {
+    try { localStorage.setItem(STORAGE_KEY + "_prefs", JSON.stringify({ lang: currentLang })); } catch (e) {}
+  }
+  function loadState() {
+    try {
+      const s = localStorage.getItem(STORAGE_KEY + "_state");
+      if (s) state = JSON.parse(s);
+    } catch (e) {}
+    if (!state.translations) state.translations = {};
+    if (!state.notes) state.notes = {};
+    if (!state.suggestions) state.suggestions = [];
+  }
+  function saveState() {
+    try { localStorage.setItem(STORAGE_KEY + "_state", JSON.stringify(state)); } catch (e) {}
+  }
+
+  function readVersions() {
+    try {
+      const v = localStorage.getItem(STORAGE_KEY + "_versions");
+      if (v) return JSON.parse(v);
+    } catch (e) {}
+    return [];
+  }
+  function saveVersions(list) {
+    try { localStorage.setItem(STORAGE_KEY + "_versions", JSON.stringify(list)); } catch (e) {}
+  }
+
+  // ============================================================
+  // TRANSLATION HELPER
+  // ============================================================
+  function t(key) {
+    const entry = T[key];
+    if (!entry) return key;
+    if (currentLang === "gu") {
+      if (state.translations[key] !== undefined && state.translations[key] !== null) return state.translations[key];
+      return entry.gu || entry.en || key;
+    }
+    return entry.en || key;
+  }
+  function escapeHtml(s) {
+    return String(s || "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
+  }
+  function stripHtml(s) {
+    return String(s || "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+  }
+
+  // ============================================================
+  // PHONE RENDERING (same as before)
+  // ============================================================
+  function phoneHTML(scene) {
+    const battPct = Math.max(2, Math.round((scene.battery / 12) * 12));
+    const micStyle = scene.micPulse ? 'style="background: #E53935; box-shadow: 0 0 0 6px rgba(229,57,53,0.15);"' : '';
+    return `
+      <div class="statusbar">
+        <span class="time">${scene.time}</span>
+        <span class="icons">
+          <svg width="14" height="10" viewBox="0 0 14 10"><path d="M1 7h2v2H1zm3-1h2v3H4zm3-2h2v5H7zm3-2h2v7h-2z" fill="currentColor"/></svg>
+          <svg width="22" height="10" viewBox="0 0 22 10"><rect x="1" y="1" width="18" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1"/><rect x="2.5" y="2.5" width="${battPct}" height="5" fill="currentColor"/><rect x="20" y="3.5" width="1.5" height="3" fill="currentColor"/></svg>
+        </span>
+      </div>
+      <div class="wa-header">
+        <span class="back"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.8l5.6-5.6L12 4l-8 8 8 8 1.4-1.4L7.8 13H20z"/></svg></span>
+        <div class="avatar">NB</div>
+        <div class="who"><div class="name">NBF Pilot</div><div class="state">online</div></div>
+        <div class="icons"><svg width="4" height="18" viewBox="0 0 4 18" fill="currentColor"><circle cx="2" cy="3" r="1.6"/><circle cx="2" cy="9" r="1.6"/><circle cx="2" cy="15" r="1.6"/></svg></div>
+      </div>
+      <div class="chat">${chatForScene(scene.id)}</div>
+      <div class="input-bar">
+        <div class="input-field"><span class="ph">Message</span></div>
+        <div class="mic-btn" ${micStyle}><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3c0 2.8-2.2 5-5 5s-5-2.2-5-5H5c0 3.5 2.6 6.4 6 6.9V21h2v-3.1c3.4-.5 6-3.4 6-6.9h-2z"/></svg></div>
+      </div>`;
+  }
+
+  function chatForScene(id) {
+    switch (id) {
+      case "s1": return `
+        <div class="date-chip">${t("s1.chat.date")}</div>
+        <div class="bubble in">${t("s1.chat.greet")}<span class="time">10:24</span></div>
+        <div class="bubble in" style="max-width: 85%;">${t("s1.chat.q")}
+          <div class="btn-stack">
+            <span class="wa-btn pri">${t("s1.chat.btn1")}</span>
+            <span class="wa-btn sec">${t("s1.chat.btn2")}</span>
+            <span class="wa-btn sec">${t("s1.chat.btn3")}</span>
+            <span class="wa-btn sec">${t("s1.chat.btn4")}</span>
+          </div><span class="time">10:24</span></div>`;
+      case "s2": return `
+        <div class="bubble out">${t("s2.chat.chosen")}<span class="time">10:25 <span class="check">✓✓</span></span></div>
+        <div class="bubble in">${t("s2.chat.intro")}<span class="time">10:25</span></div>
+        <div class="bubble in" style="max-width: 95%;">
+          <div class="progress"><span>${t("s2.chat.prog")}</span>
+            <span class="dots"><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></span></div>
+          <div style="margin-top: 6px; font-weight: 500;">${t("s2.chat.q")}</div>
+          <div class="btn-row"><span class="yn-btn">${t("s2.chat.yes")}</span><span class="yn-btn ghost">${t("s2.chat.no")}</span></div>
+          <span class="time">10:25</span></div>`;
+      case "s3": return `
+        <div class="bubble in">${t("s3.chat.pass")}<span class="time">10:26</span></div>
+        <div class="bubble in" style="max-width: 90%;">
+          <div style="font-weight: 600; color: var(--wa-header);">${t("s3.chat.sec")}</div>
+          <div style="margin-top: 4px;">${t("s3.chat.q")}</div>
+          <span class="meta">${t("s3.chat.hint")}</span>
+          <span class="time">10:27</span></div>`;
+      case "s4": return `
+        <div class="bubble in" style="max-width: 92%;">
+          <div style="font-weight: 600; color: var(--wa-header);">${t("s4.chat.sec")}</div>
+          <div style="margin-top: 4px;">${t("s4.chat.lead")}</div><span class="time">10:32</span></div>
+        <div class="bubble out"><span style="color: var(--wa-text-faint);">${t("s4.chat.done")}</span><br>${t("s4.chat.child1")}<span class="time">10:33 <span class="check">✓✓</span></span></div>
+        <div class="bubble in" style="max-width: 92%;">
+          <div class="progress"><span style="font-weight: 500; color: var(--wa-header);">${t("s4.chat.prog")}</span>
+            <span class="dots"><span class="dot on"></span><span class="dot on"></span><span class="dot"></span></span></div>
+          <div style="margin-top: 6px;">${t("s4.chat.q")}</div><span class="time">10:34</span></div>`;
+      case "s5": {
+        const chk = `<svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor"><path d="M9.5 2.3L4 7.9 1.5 5.4.3 6.6 4 10.3l6.8-6.8z"/></svg>`;
+        return `
+        <div class="bubble in" style="max-width: 95%;">
+          <div style="font-weight: 600; color: var(--wa-header);">${t("s5.chat.sec")}</div>
+          <div style="margin-top: 4px;">${t("s5.chat.q")}</div>
+          <div class="checklist">
+            <div class="item checked"><span class="box">${chk}</span><span class="label">${t("s5.chat.d1")}</span></div>
+            <div class="item checked"><span class="box">${chk}</span><span class="label">${t("s5.chat.d2")}</span></div>
+            <div class="item checked"><span class="box">${chk}</span><span class="label">${t("s5.chat.d3")}</span></div>
+            <div class="item"><span class="box"></span><span class="label">${t("s5.chat.d4")}</span></div>
+            <div class="item checked"><span class="box">${chk}</span><span class="label">${t("s5.chat.d5")}</span></div>
+            <div class="item"><span class="box"></span><span class="label">${t("s5.chat.d6")}</span></div>
+            <div class="item"><span class="box"></span><span class="label">${t("s5.chat.d7")}</span></div>
+          </div>
+          <div class="btn-row"><span class="yn-btn">${t("s5.chat.done")}</span></div>
+          <span class="time">10:52</span></div>`;
+      }
+      case "s6": return `
+        <div class="bubble in" style="max-width: 95%;">
+          <div style="font-weight: 600; color: var(--wa-header);">${t("s6.chat.sec")}</div>
+          <div style="margin-top: 4px;">${t("s6.chat.q")}</div>
+          <span class="meta">${t("s6.chat.hint")}</span>
+          <div class="photo-prompt">
+            <div class="camera-btn"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="3.2"/><path d="M9 2L7.2 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3.2L15 2zm3 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/></svg></div>
+            <div class="caption">${t("s6.chat.tap")}</div>
+          </div>
+          <div class="btn-row"><span class="yn-btn ghost">${t("s6.chat.skip")}</span></div>
+          <span class="time">11:04</span></div>`;
+      case "s7": return `
+        <div class="bubble in" style="max-width: 95%;">
+          <div style="font-weight: 600; color: var(--wa-header);">${t("s7.chat.sec")}</div>
+          <div style="margin-top: 4px;">${t("s7.chat.lead")}</div>
+          <div style="margin-top: 6px; padding: 8px; background: #F7F7F7; border-radius: 4px; font-size: 11.5px; line-height: 1.45;">
+            <em>${t("s7.chat.script")}</em>
+            <div style="margin-top: 4px; color: var(--wa-text-faint); font-size: 10.5px;">${t("s7.chat.fullBtn")}</div>
+          </div>
+          <div class="record-box">
+            <div class="record-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3c0 2.8-2.2 5-5 5s-5-2.2-5-5H5c0 3.5 2.6 6.4 6 6.9V21h2v-3.1c3.4-.5 6-3.4 6-6.9h-2z"/></svg></div>
+            <div class="caption">${t("s7.chat.recHint")}</div>
+          </div>
+          <div class="btn-row" style="margin-top: 10px;"><span class="yn-btn ghost">${t("s7.chat.noteBtn")}</span></div>
+          <span class="time">11:14</span></div>`;
+      case "s8": return `
+        <div class="bubble in" style="max-width: 96%;">
+          <div style="font-weight: 600; color: var(--wa-header);">${t("s8.chat.lead")}</div>
+          <div class="summary">
+            <div class="sec-head">${t("s8.chat.sh1")}</div>
+            <div class="row"><span class="k">${t("s8.chat.k1")}</span><span class="v">${t("s8.chat.v1")}</span></div>
+            <div class="row"><span class="k">${t("s8.chat.k2")}</span><span class="v">${t("s8.chat.v2")}</span></div>
+            <div class="row"><span class="k">${t("s8.chat.k3")}</span><span class="v">${t("s8.chat.v3")}</span></div>
+            <div class="sec-head">${t("s8.chat.sh2")}</div>
+            <div class="row"><span class="k">${t("s8.chat.k4")}</span><span class="v">${t("s8.chat.v4")}</span></div>
+            <div class="row"><span class="k">${t("s8.chat.k5")}</span><span class="v">${t("s8.chat.v5")}</span></div>
+            <div class="sec-head">${t("s8.chat.sh3")}</div>
+            <div class="row"><span class="k">${t("s8.chat.k6")}</span><span class="v">${t("s8.chat.v6")}</span></div>
+            <div class="row"><span class="k">${t("s8.chat.k7")}</span><span class="v">${t("s8.chat.v7")}</span></div>
+            <div class="row"><span class="k">${t("s8.chat.k8")}</span><span class="v">${t("s8.chat.v8")}</span></div>
+            <div class="sec-head">${t("s8.chat.sh4")}</div>
+            <div class="row"><span class="k">${t("s8.chat.k9")}</span><span class="v">${t("s8.chat.v9")}</span></div>
+            <div class="row"><span class="k">${t("s8.chat.k10")}</span><span class="v">${t("s8.chat.v10")}</span></div>
+            <div class="row"><span class="k">${t("s8.chat.k11")}</span><span class="v">${t("s8.chat.v11")}</span></div>
+            <div class="row"><span class="k">${t("s8.chat.k12")}</span><span class="v">${t("s8.chat.v12")}</span></div>
+          </div>
+          <div class="btn-row" style="margin-top: 10px;"><span class="yn-btn">${t("s8.chat.submit")}</span></div>
+          <div class="btn-row" style="margin-top: 4px;">
+            <span class="yn-btn ghost" style="flex: 1;">${t("s8.chat.edit")}</span>
+            <span class="yn-btn ghost" style="flex: 1;">${t("s8.chat.draft")}</span>
+          </div>
+          <span class="time">11:28</span></div>`;
+      case "s9": return `
+        <div class="bubble out">${t("s9.chat.chosen")}<span class="time">11:28 <span class="check">✓✓</span></span></div>
+        <div class="bubble in" style="max-width: 92%;">
+          <div style="font-size: 20px; margin-bottom: 4px;">🙏</div>
+          <div style="font-weight: 600; font-size: 14px;">${t("s9.chat.thanks")}</div>
+          <div style="margin-top: 4px;">${t("s9.chat.body")}</div>
+          <div class="ref-pill">#A-2026-10-047</div><span class="time">11:29</span></div>
+        <div class="bubble in">${t("s9.chat.next")}
+          <span class="meta">${t("s9.chat.hint")}</span>
+          <div class="btn-row" style="margin-top: 8px;"><span class="yn-btn">${t("s9.chat.again")}</span></div>
+          <span class="time">11:29</span></div>`;
+    }
+    return "";
+  }
+
+  // ============================================================
+  // RENDER MAIN
+  // ============================================================
+  // Keys whose translation contains HTML (safe, author-controlled) and should be set as innerHTML
+  const HTML_KEYS = new Set(["intro.namesNote.card"]);
+
+  function renderAll() {
+    document.body.setAttribute("lang", currentLang);
+    document.querySelectorAll("[data-k]").forEach(el => {
+      const key = el.getAttribute("data-k");
+      if (HTML_KEYS.has(key)) {
+        el.innerHTML = t(key);
+      } else {
+        el.textContent = t(key);
+      }
+    });
+    const nt = document.getElementById("notesText");
+    if (nt) nt.placeholder = t("ui.notesPh");
+    const nv = document.getElementById("newVersionName");
+    if (nv) nv.placeholder = t("ui.newVersionPh");
+
+    document.getElementById("toggleEn").classList.toggle("on", currentLang === "en");
+    document.getElementById("toggleGu").classList.toggle("on", currentLang === "gu");
+    document.getElementById("splashLangEn").classList.toggle("on", currentLang === "en");
+    document.getElementById("splashLangGu").classList.toggle("on", currentLang === "gu");
+
+    // Current version label
+    const label = document.getElementById("currentVersionLabel");
+    if (loadedFromVersionId) {
+      const v = readVersions().find(x => x.id === loadedFromVersionId);
+      label.innerHTML = `<span class="current-version-badge">${t("ui.loaded")}: ${escapeHtml(v?.name || "?")}</span>`;
+    } else {
+      label.innerHTML = ``;
+    }
+
+    renderScene();
+    updateSendCount();
+  }
+
+  function renderScene() {
+    const scene = scenes[currentIndex];
+    const sid = scene.id;
+    document.getElementById("sceneNum").textContent = String(currentIndex + 1).padStart(2, "0") + " / 09";
+    document.getElementById("sceneCaption").textContent = t(sid + ".caption");
+    document.getElementById("sceneTitle").textContent = t(sid + ".title");
+    document.getElementById("sceneDesc").textContent = t(sid + ".desc");
+    document.getElementById("sceneNotes").innerHTML = t(sid + ".notes");
+    document.getElementById("phoneScreen").innerHTML = phoneHTML(scene);
+
+    document.getElementById("btnBack").disabled = (currentIndex === 0);
+    document.getElementById("btnNext").disabled = (currentIndex === scenes.length - 1);
+
+    const dotsEl = document.getElementById("sceneDots");
+    dotsEl.innerHTML = scenes.map((s, i) =>
+      `<button class="d ${i === currentIndex ? 'on' : ''}" data-i="${i}" title="${escapeHtml(t(s.id + '.caption'))}"></button>`).join("");
+    dotsEl.querySelectorAll(".d").forEach(d => d.addEventListener("click", () => goto(parseInt(d.dataset.i))));
+
+    // Notes textarea
+    const nt = document.getElementById("notesText");
+    nt.value = state.notes[sid] || "";
+    document.getElementById("notesStatus").textContent = "";
+
+    // Suggestions for this scene
+    renderSceneSuggestions();
+
+    try { history.replaceState(null, "", "#" + sid); } catch (e) {}
+  }
+
+  function renderSceneSuggestions() {
+    const sid = scenes[currentIndex].id;
+    const list = state.suggestions.filter(s => s.sceneId === sid);
+    const el = document.getElementById("suggestionList");
+    if (list.length === 0) {
+      el.innerHTML = `<div style="font-size: 13px; color: var(--fg-faint); font-style: italic; padding: 8px 0;">${escapeHtml(t("ui.noSuggests"))}</div>`;
+      return;
+    }
+    el.innerHTML = list.map(s => suggestionItemHTML(s)).join("");
+    el.querySelectorAll(".remove-btn").forEach(b => {
+      b.addEventListener("click", () => {
+        state.suggestions = state.suggestions.filter(x => x.id !== b.dataset.id);
+        saveState();
+        renderSceneSuggestions();
+        updateSendCount();
+      });
+    });
+  }
+
+  function suggestionItemHTML(s) {
+    let body = "";
+    if (s.type === "add") {
+      const pos = describePosition(s.position);
+      body = `<span class="tag add">ADD</span> "${escapeHtml(s.text)}" <span style="color: var(--fg-faint); font-size: 12px;">— ${escapeHtml(pos)}</span>`;
+    } else {
+      const names = (s.targets || []).map(k => `"${stripHtml(T[k]?.en || k)}"`).join(", ");
+      body = `<span class="tag del">DELETE</span> ${escapeHtml(names)}`;
+    }
+    const reason = s.reason ? `<div class="reason">${escapeHtml(s.reason)}</div>` : "";
+    return `<div class="suggestion-item"><div style="flex:1;">${body}${reason}</div><button class="remove-btn" data-id="${s.id}" title="Remove this suggestion">×</button></div>`;
+  }
+
+  function describePosition(p) {
+    if (!p) return "";
+    if (p === "start") return t("ui.posStart");
+    if (p === "end") return t("ui.posEnd");
+    if (p.startsWith("before:")) {
+      const key = p.slice(7);
+      return t("ui.posBefore") + '"' + stripHtml(T[key]?.en || key) + '"';
+    }
+    if (p.startsWith("after:")) {
+      const key = p.slice(6);
+      return t("ui.posAfter") + '"' + stripHtml(T[key]?.en || key) + '"';
+    }
+    return p;
+  }
+
+  function goto(i) {
+    if (i < 0 || i >= scenes.length) return;
+    currentIndex = i;
+    renderScene();
+  }
+
+  // ============================================================
+  // NOTES (per-screen)
+  // ============================================================
+  const notesTextEl = document.getElementById("notesText");
+  let notesSaveTimer = null;
+  notesTextEl.addEventListener("input", () => {
+    const sid = scenes[currentIndex].id;
+    const val = notesTextEl.value;
+    if (val.trim()) {
+      state.notes[sid] = val;
+    } else {
+      delete state.notes[sid];
+    }
+    clearTimeout(notesSaveTimer);
+    notesSaveTimer = setTimeout(() => {
+      saveState();
+      const el = document.getElementById("notesStatus");
+      el.textContent = t("ui.saved");
+      el.classList.add("saved");
+      setTimeout(() => { el.textContent = ""; el.classList.remove("saved"); }, 1500);
+      updateSendCount();
+    }, 300);
+  });
+
+  // ============================================================
+  // NAV
+  // ============================================================
+  document.getElementById("btnBack").addEventListener("click", () => goto(currentIndex - 1));
+  document.getElementById("btnNext").addEventListener("click", () => goto(currentIndex + 1));
+
+  // ============================================================
+  // LANGUAGE
+  // ============================================================
+  function setLang(l) {
+    currentLang = l;
+    savePrefs();
+    renderAll();
+  }
+  document.getElementById("toggleEn").addEventListener("click", () => setLang("en"));
+  document.getElementById("toggleGu").addEventListener("click", () => setLang("gu"));
+  document.getElementById("splashLangEn").addEventListener("click", () => setLang("en"));
+  document.getElementById("splashLangGu").addEventListener("click", () => setLang("gu"));
+  document.getElementById("langPicker").querySelectorAll(".lang-choice").forEach(btn => {
+    btn.addEventListener("click", () => {
+      setLang(btn.dataset.lang);
+      document.getElementById("langPicker").hidden = true;
+    });
+  });
+
+  // ============================================================
+  // ADD/DELETE QUESTION SUGGESTIONS
+  // ============================================================
+  const addQOverlay = document.getElementById("addQOverlay");
+  const addQModal = document.getElementById("addQModal");
+  function openAddQ() {
+    const sid = scenes[currentIndex].id;
+    document.getElementById("addQText").value = "";
+    document.getElementById("addQReason").value = "";
+    document.getElementById("addQText").placeholder = t("ui.notesPh");
+    const sel = document.getElementById("addQWhere");
+    const options = [
+      { v: "start", label: t("ui.posStart") },
+      { v: "end", label: t("ui.posEnd") },
+    ];
+    SCENE_QUESTIONS[sid].forEach(k => {
+      const name = stripHtml(T[k]?.en || k);
+      options.push({ v: "before:" + k, label: t("ui.posBefore") + '"' + name + '"' });
+      options.push({ v: "after:" + k, label: t("ui.posAfter") + '"' + name + '"' });
+    });
+    sel.innerHTML = options.map(o => `<option value="${escapeHtml(o.v)}">${escapeHtml(o.label)}</option>`).join("");
+    addQOverlay.classList.add("open");
+    addQModal.classList.add("open");
+  }
+  function closeAddQ() { addQOverlay.classList.remove("open"); addQModal.classList.remove("open"); }
+  document.getElementById("btnAddQuestion").addEventListener("click", openAddQ);
+  document.querySelectorAll("[data-close-addq]").forEach(b => b.addEventListener("click", closeAddQ));
+  addQOverlay.addEventListener("click", closeAddQ);
+  document.getElementById("btnAddQSubmit").addEventListener("click", () => {
+    const text = document.getElementById("addQText").value.trim();
+    if (!text) return;
+    const sid = scenes[currentIndex].id;
+    const suggestion = {
+      id: "sug_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7),
+      sceneId: sid,
+      type: "add",
+      text,
+      position: document.getElementById("addQWhere").value,
+      reason: document.getElementById("addQReason").value.trim(),
+      createdAt: Date.now(),
+    };
+    state.suggestions.push(suggestion);
+    saveState();
+    closeAddQ();
+    renderSceneSuggestions();
+    updateSendCount();
+  });
+
+  const delQOverlay = document.getElementById("delQOverlay");
+  const delQModal = document.getElementById("delQModal");
+  function openDelQ() {
+    const sid = scenes[currentIndex].id;
+    document.getElementById("delQReason").value = "";
+    const pickEl = document.getElementById("delQPick");
+    pickEl.innerHTML = SCENE_QUESTIONS[sid].map(k => {
+      const text = t(k);
+      const stripped = stripHtml(text);
+      const preview = stripped.length > 80 ? stripped.slice(0, 80) + "…" : stripped;
+      return `<label><input type="checkbox" value="${escapeHtml(k)}"><div class="label-text">${escapeHtml(preview)}<span class="key">${escapeHtml(k)}</span></div></label>`;
+    }).join("");
+    delQOverlay.classList.add("open");
+    delQModal.classList.add("open");
+  }
+  function closeDelQ() { delQOverlay.classList.remove("open"); delQModal.classList.remove("open"); }
+  document.getElementById("btnDeleteQuestion").addEventListener("click", openDelQ);
+  document.querySelectorAll("[data-close-delq]").forEach(b => b.addEventListener("click", closeDelQ));
+  delQOverlay.addEventListener("click", closeDelQ);
+  document.getElementById("btnDelQSubmit").addEventListener("click", () => {
+    const targets = [...document.getElementById("delQPick").querySelectorAll("input:checked")].map(i => i.value);
+    if (targets.length === 0) return;
+    const sid = scenes[currentIndex].id;
+    const suggestion = {
+      id: "sug_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7),
+      sceneId: sid,
+      type: "delete",
+      targets,
+      reason: document.getElementById("delQReason").value.trim(),
+      createdAt: Date.now(),
+    };
+    state.suggestions.push(suggestion);
+    saveState();
+    closeDelQ();
+    renderSceneSuggestions();
+    updateSendCount();
+  });
+
+  // ============================================================
+  // TRANSLATION EDITOR
+  // ============================================================
+  const editorOverlay = document.getElementById("editorOverlay");
+  const editorDrawer = document.getElementById("editorDrawer");
+  document.getElementById("btnEditor").addEventListener("click", () => {
+    editorOverlay.classList.add("open"); editorDrawer.classList.add("open"); renderEditorBody();
+  });
+  document.querySelectorAll("[data-close-editor]").forEach(b => b.addEventListener("click", closeEditor));
+  editorOverlay.addEventListener("click", closeEditor);
+  function closeEditor() { editorOverlay.classList.remove("open"); editorDrawer.classList.remove("open"); }
+
+  function renderEditorBody() {
+    const body = document.getElementById("editorBody");
+    body.innerHTML = EDITOR_GROUPS.map(g => `
+      <div class="editor-group">
+        <h3>${escapeHtml(g.title)}</h3>
+        ${g.keys.map(k => editRowHTML(k)).join("")}
+      </div>`).join("");
+
+    body.querySelectorAll(".edit-row").forEach(row => {
+      const key = row.dataset.key;
+      const textarea = row.querySelector("textarea");
+      const saveBtn = row.querySelector("button.save");
+      const resetBtn = row.querySelector("button.reset");
+      const statusEl = row.querySelector(".status");
+
+      saveBtn.addEventListener("click", () => {
+        state.translations[key] = textarea.value;
+        saveState();
+        statusEl.textContent = t("ui.saved") + " ✓";
+        row.classList.add("edited");
+        setTimeout(() => { statusEl.textContent = ""; }, 1500);
+        renderAll();
+      });
+      resetBtn.addEventListener("click", () => {
+        delete state.translations[key];
+        saveState();
+        textarea.value = T[key]?.gu || "";
+        statusEl.textContent = t("ui.reset") + " ✓";
+        row.classList.remove("edited");
+        setTimeout(() => { statusEl.textContent = ""; }, 1500);
+        renderAll();
+      });
+    });
+  }
+
+  function editRowHTML(key) {
+    const entry = T[key];
+    if (!entry) return "";
+    const isEdited = state.translations[key] !== undefined;
+    const current = isEdited ? state.translations[key] : (entry.gu || "");
+    return `
+      <div class="edit-row ${isEdited ? 'edited' : ''}" data-key="${escapeHtml(key)}">
+        <div class="meta"><span class="k">${escapeHtml(key)}</span>${isEdited ? '<span class="by">edited</span>' : '<span class="by">default</span>'}</div>
+        <div class="en-ref">${escapeHtml(entry.en)}</div>
+        <textarea>${escapeHtml(current)}</textarea>
+        <div class="actions">
+          <button class="save">${escapeHtml(t("ui.save"))}</button>
+          <button class="reset">${escapeHtml(t("ui.reset"))}</button>
+          <span class="status"></span>
+        </div>
+      </div>`;
+  }
+
+  // ============================================================
+  // VERSIONS
+  // ============================================================
+  const versionsOverlay = document.getElementById("versionsOverlay");
+  const versionsDrawer = document.getElementById("versionsDrawer");
+  document.getElementById("btnVersions").addEventListener("click", () => {
+    versionsOverlay.classList.add("open"); versionsDrawer.classList.add("open"); renderVersions();
+  });
+  document.querySelectorAll("[data-close-versions]").forEach(b => b.addEventListener("click", closeVersions));
+  versionsOverlay.addEventListener("click", closeVersions);
+  function closeVersions() { versionsOverlay.classList.remove("open"); versionsDrawer.classList.remove("open"); }
+
+  document.getElementById("btnSaveVersion").addEventListener("click", () => {
+    const nameInput = document.getElementById("newVersionName");
+    const name = nameInput.value.trim();
+    if (!name) { nameInput.focus(); return; }
+    const list = readVersions();
+    const version = {
+      id: "v_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7),
+      name,
+      savedAt: Date.now(),
+      state: JSON.parse(JSON.stringify(state)),
+    };
+    list.push(version);
+    saveVersions(list);
+    nameInput.value = "";
+    loadedFromVersionId = version.id;
+    renderAll();
+    renderVersions();
+  });
+
+  function renderVersions() {
+    const list = readVersions();
+    const el = document.getElementById("versionList");
+    if (list.length === 0) {
+      el.innerHTML = `<div class="empty-list">${escapeHtml(t("ui.noVersions"))}</div>`;
+      return;
+    }
+    el.innerHTML = list.sort((a, b) => b.savedAt - a.savedAt).map(v => {
+      const notesCount = Object.keys(v.state?.notes || {}).length;
+      const editsCount = Object.keys(v.state?.translations || {}).length;
+      const sugCount = (v.state?.suggestions || []).length;
+      return `<div class="version-item" data-id="${v.id}">
+        <div class="vname">${escapeHtml(v.name)}</div>
+        <div class="vdate">${new Date(v.savedAt).toLocaleString()}</div>
+        <div class="vstats"><span>📝 ${notesCount}</span><span>🌐 ${editsCount}</span><span>⚙ ${sugCount}</span></div>
+        <div class="vactions">
+          <button data-action="load">${escapeHtml(t("ui.loadVersion"))}</button>
+          <button class="send" data-action="send">${escapeHtml(t("ui.sendVersion"))}</button>
+          <button class="danger" data-action="delete">${escapeHtml(t("ui.deleteVersion"))}</button>
+        </div></div>`;
+    }).join("");
+
+    el.querySelectorAll(".version-item").forEach(row => {
+      const id = row.dataset.id;
+      row.querySelectorAll("button[data-action]").forEach(b => {
+        b.addEventListener("click", () => {
+          const action = b.dataset.action;
+          const list2 = readVersions();
+          const v = list2.find(x => x.id === id);
+          if (!v) return;
+          if (action === "load") {
+            if (!confirm(t("ui.confirmLoad"))) return;
+            state = JSON.parse(JSON.stringify(v.state));
+            loadedFromVersionId = v.id;
+            saveState();
+            closeVersions();
+            renderAll();
+          } else if (action === "send") {
+            openSendModal(v);
+          } else if (action === "delete") {
+            if (!confirm(t("ui.confirmDelete"))) return;
+            saveVersions(list2.filter(x => x.id !== id));
+            renderVersions();
+          }
+        });
+      });
+    });
+  }
+
+  // ============================================================
+  // SEND TO NBF (WhatsApp)
+  // ============================================================
+  const sendOverlay = document.getElementById("sendOverlay");
+  const sendModal = document.getElementById("sendModal");
+  let sendCurrentState = null; // state being sent (current or a loaded version's)
+  let sendCurrentName = "";
+
+  function updateSendCount() {
+    const n = countFeedback(state);
+    document.getElementById("sendCount").textContent = n;
+  }
+  function countFeedback(st) {
+    const notesCount = Object.values(st.notes || {}).filter(v => v && v.trim()).length;
+    const editsCount = Object.keys(st.translations || {}).length;
+    const sugCount = (st.suggestions || []).length;
+    return notesCount + editsCount + sugCount;
+  }
+
+  document.getElementById("btnSend").addEventListener("click", () => openSendModal(null));
+  document.querySelectorAll("[data-close-send]").forEach(b => b.addEventListener("click", closeSend));
+  sendOverlay.addEventListener("click", closeSend);
+  function closeSend() { sendOverlay.classList.remove("open"); sendModal.classList.remove("open"); }
+
+  function openSendModal(version) {
+    if (version) {
+      sendCurrentState = version.state;
+      sendCurrentName = version.name;
+    } else {
+      sendCurrentState = state;
+      sendCurrentName = loadedFromVersionId ?
+        (readVersions().find(x => x.id === loadedFromVersionId)?.name || t("ui.unsaved"))
+        : t("ui.unsaved");
+    }
+    renderSendBody();
+    sendOverlay.classList.add("open");
+    sendModal.classList.add("open");
+  }
+
+  function renderSendBody() {
+    const body = document.getElementById("sendBody");
+    const st = sendCurrentState;
+    const notesEntries = Object.entries(st.notes || {}).filter(([k, v]) => v && v.trim());
+    const editsEntries = Object.entries(st.translations || {});
+    const suggests = st.suggestions || [];
+
+    if (notesEntries.length + editsEntries.length + suggests.length === 0) {
+      body.innerHTML = `<div class="empty-list">${escapeHtml(t("ui.sendNothingYet"))}</div>`;
+      return;
+    }
+
+    body.innerHTML = `
+      <div class="field">
+        <label><span>${escapeHtml(t("ui.sendYourName"))}</span></label>
+        <input type="text" id="sendYourName" placeholder="${escapeHtml(t("ui.sendYourNamePh"))}">
+      </div>
+      ${notesEntries.length ? `
+        <div class="send-section" data-section="notes">
+          <div class="send-head">
+            <h4>${escapeHtml(t("ui.sendIncludeNotes"))} (${notesEntries.length})</h4>
+            <label class="toggle"><input type="checkbox" checked data-section-toggle> on</label>
+          </div>
+          <div class="preview">${escapeHtml(notesEntries.map(([k, v]) => scenes.find(s => s.id === k) ? `${t(k + ".caption")}: ${v}` : v).join("\n\n"))}</div>
+        </div>
+      ` : ""}
+      ${editsEntries.length ? `
+        <div class="send-section" data-section="edits">
+          <div class="send-head">
+            <h4>${escapeHtml(t("ui.sendIncludeEdits"))} (${editsEntries.length})</h4>
+            <label class="toggle"><input type="checkbox" checked data-section-toggle> on</label>
+          </div>
+          <div class="preview">${escapeHtml(editsEntries.map(([k, v]) => `${k}: "${v}" (was: "${T[k]?.gu || ''}")`).join("\n"))}</div>
+        </div>
+      ` : ""}
+      ${suggests.length ? `
+        <div class="send-section" data-section="suggests">
+          <div class="send-head">
+            <h4>${escapeHtml(t("ui.sendIncludeSuggests"))} (${suggests.length})</h4>
+            <label class="toggle"><input type="checkbox" checked data-section-toggle> on</label>
+          </div>
+          <div class="preview">${escapeHtml(suggests.map(s => suggestionTextForMessage(s)).join("\n\n"))}</div>
+        </div>
+      ` : ""}
+      <div class="msg-length" id="msgLength"></div>
+    `;
+
+    body.querySelectorAll("[data-section-toggle]").forEach(cb => {
+      cb.addEventListener("change", () => {
+        const section = cb.closest(".send-section");
+        section.classList.toggle("off", !cb.checked);
+        updateMsgLength();
+      });
+    });
+    updateMsgLength();
+  }
+
+  function suggestionTextForMessage(s) {
+    const sceneLabel = T[s.sceneId + ".caption"]?.en || s.sceneId;
+    if (s.type === "add") {
+      return `Scene "${sceneLabel}" — ADD question (${describePositionEn(s.position)}):\n  "${s.text}"${s.reason ? "\n  Reason: " + s.reason : ""}`;
+    } else {
+      const names = (s.targets || []).map(k => stripHtml(T[k]?.en || k)).join(", ");
+      return `Scene "${sceneLabel}" — DELETE: ${names}${s.reason ? "\n  Reason: " + s.reason : ""}`;
+    }
+  }
+  function describePositionEn(p) {
+    if (!p) return "";
+    if (p === "start") return "at start";
+    if (p === "end") return "at end";
+    if (p.startsWith("before:")) return "before \"" + stripHtml(T[p.slice(7)]?.en || p.slice(7)) + "\"";
+    if (p.startsWith("after:")) return "after \"" + stripHtml(T[p.slice(6)]?.en || p.slice(6)) + "\"";
+    return p;
+  }
+
+  function buildMessage() {
+    const name = document.getElementById("sendYourName")?.value?.trim() || "";
+    const st = sendCurrentState;
+    const inc = {
+      notes: !document.querySelector('[data-section="notes"]') || document.querySelector('[data-section="notes"] [data-section-toggle]').checked,
+      edits: !document.querySelector('[data-section="edits"]') || document.querySelector('[data-section="edits"] [data-section-toggle]').checked,
+      suggests: !document.querySelector('[data-section="suggests"]') || document.querySelector('[data-section="suggests"] [data-section-toggle]').checked,
+    };
+
+    let msg = `*NBF Prototype Feedback*\n`;
+    msg += `Version: ${sendCurrentName}\n`;
+    if (name) msg += `From: ${name}\n`;
+    msg += `Date: ${new Date().toLocaleDateString()}\n`;
+    msg += `Language reviewed: ${currentLang === "gu" ? "Gujarati" : "English"}\n`;
+
+    if (inc.notes) {
+      const notes = Object.entries(st.notes || {}).filter(([k, v]) => v && v.trim());
+      if (notes.length) {
+        msg += `\n━━ NOTES ━━\n`;
+        notes.forEach(([sid, v]) => {
+          const sceneLabel = T[sid + ".caption"]?.en || sid;
+          const idx = scenes.findIndex(s => s.id === sid) + 1;
+          msg += `\nScreen ${idx} (${sceneLabel}):\n${v}\n`;
+        });
+      }
+    }
+    if (inc.edits) {
+      const edits = Object.entries(st.translations || {});
+      if (edits.length) {
+        msg += `\n━━ GUJARATI SUGGESTIONS ━━\n`;
+        edits.forEach(([k, v]) => {
+          const original = T[k]?.gu || "";
+          const enRef = stripHtml(T[k]?.en || "");
+          msg += `\n• ${k} (English: "${enRef}"):\n  Was: ${original}\n  Suggested: ${v}\n`;
+        });
+      }
+    }
+    if (inc.suggests) {
+      const sugs = st.suggestions || [];
+      if (sugs.length) {
+        msg += `\n━━ STRUCTURAL SUGGESTIONS ━━\n`;
+        sugs.forEach(s => {
+          msg += `\n${suggestionTextForMessage(s)}\n`;
+        });
+      }
+    }
+    msg += `\n━━\nSent from NBF Design Preview`;
+    return msg;
+  }
+
+  function updateMsgLength() {
+    const msg = buildMessage();
+    const el = document.getElementById("msgLength");
+    if (!el) return;
+    const len = msg.length;
+    el.textContent = `${len} ${t("ui.sendCharCount")}`;
+    el.classList.toggle("warn", len > 3500);
+    if (len > 3500) {
+      el.textContent += " — " + t("ui.sendTooLong");
+    }
+  }
+
+  document.getElementById("btnSendWa").addEventListener("click", () => {
+    const msg = buildMessage();
+    const url = `https://wa.me/${NBF_WHATSAPP}?text=${encodeURIComponent(msg)}`;
+    window.open(url, "_blank");
+  });
+
+  // listen for input changes on name field to update preview
+  document.getElementById("sendBody").addEventListener("input", (e) => {
+    if (e.target.id === "sendYourName") updateMsgLength();
+  });
+
+  // ============================================================
+  // INTRO SPLASH
+  // ============================================================
+  const introSplash = document.getElementById("introSplash");
+  function openIntro(firstVisit) {
+    introSplash.classList.toggle("first-visit", !!firstVisit);
+    introSplash.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+  function closeIntro() {
+    introSplash.classList.remove("open");
+    document.body.style.overflow = "";
+    try { localStorage.setItem(STORAGE_KEY + "_seenIntro", "1"); } catch (e) {}
+  }
+  document.getElementById("btnIntro").addEventListener("click", () => openIntro(false));
+  document.getElementById("btnStartReview").addEventListener("click", closeIntro);
+  document.getElementById("btnIntroClose").addEventListener("click", closeIntro);
+
+  // After the lang picker is dismissed, show intro on first visit
+  const originalLangChoices = document.getElementById("langPicker").querySelectorAll(".lang-choice");
+  originalLangChoices.forEach(btn => {
+    btn.addEventListener("click", () => {
+      // The existing handler already closes the picker and sets lang.
+      // Check if intro has not been seen → show it now.
+      let seen = false;
+      try { seen = !!localStorage.getItem(STORAGE_KEY + "_seenIntro"); } catch (e) {}
+      if (!seen) {
+        setTimeout(() => openIntro(true), 50);
+      }
+    }, { capture: false });
+  });
+
+  // ============================================================
+  // BOOT
+  // ============================================================
+  function init() {
+    loadState();
+    readPrefs();
+    try {
+      const h = location.hash.replace("#", "");
+      const i = scenes.findIndex(s => s.id === h);
+      if (i >= 0) currentIndex = i;
+    } catch (e) {}
+
+    const hasLangPref = (() => { try { return !!localStorage.getItem(STORAGE_KEY + "_prefs"); } catch (e) { return false; } })();
+    const hasSeenIntro = (() => { try { return !!localStorage.getItem(STORAGE_KEY + "_seenIntro"); } catch (e) { return false; } })();
+
+    if (!hasLangPref) {
+      // First-ever visit: show lang picker; intro will open after a language is chosen.
+      document.getElementById("langPicker").hidden = false;
+    } else if (!hasSeenIntro) {
+      // Returning before but hasn't seen intro: show intro now.
+      openIntro(true);
+    }
+    renderAll();
+  }
+  init();
+</script>
+
+</body>
+</html>
